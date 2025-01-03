@@ -1,0 +1,23 @@
+{
+  "name": "crosshair-y",
+  "productName": "Crosshair Y",
+  "version": "1.0",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win32": "electron-packager . crosshair-y --platform=win32 --arch=x64 --out=build/ --overwrite --icon=icon.ico",
+    "build:win32-32bit": "electron-packager . crosshair-y --platform=win32 --arch=ia32 --out=build/ --overwrite --icon=icon.ico",
+    "build:linux": "electron-packager . crosshair-y --platform=linux --arch=x64 --out=build/ --overwrite --icon=icon.png"
+  },
+  "keywords": [],
+  "author": "YSSF",
+  "license": "MIT",
+  "description": "A free and open-source alternative to Crosshair X",
+  "dependencies": {
+    "electron": "^33.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "electron-packager": "^17.1.2"
+  }
+}
