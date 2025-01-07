@@ -5,6 +5,9 @@
     --tertiary-color: #3e3e3e;
     --line-color: #444;
     --grayed-out: #888;
+    --scroll-bar-normal: #4e4e4e;
+    --scroll-bar-hover: #555;
+    --scroll-bar-active: #3a3a3a;
 }
 
 @font-face {
@@ -213,5 +216,75 @@ body {
                 }
             }
         }
+    }
+}
+
+.modal-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, .5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+
+    .modal-foreground {
+        flex-basis: 4in;
+        height: 1in;
+        background-color: var(--primary-color);
+        border-radius: calc(var(--default-px) * 2);
+        padding: var(--default-px);
+        padding-top: calc(var(--default-px) * 2);
+
+        .modal-wrapper {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+
+            .modal-wrapper-buttons {
+                align-self: flex-end;
+                display: flex;
+                gap: calc(var(--default-px) / 2);
+
+                .modal-button {
+                    all: unset;
+                    padding: var(--default-px) calc(var(--default-px) * 2);
+                    border-radius: var(--default-px);
+                    background-color: var(--secondary-color);
+                    cursor: pointer;
+                    transition: background 200ms;
+
+                    &:hover {
+                        background-color: var(--tertiary-color);
+                    }
+                }
+            }
+        }
+    }
+}
+
+::-webkit-scrollbar {
+    width: var(--default-px);
+    height: var(--default-px);
+}
+
+::-webkit-scrollbar-track {
+    background-color: var(--primary-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--scroll-bar-normal);
+    border-radius: var(--default-px);
+
+    &:hover {
+        background-color: var(--scroll-bar-hover);
+    }
+
+    &:active {
+        background-color: var(--scroll-bar-active);
     }
 }

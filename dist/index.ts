@@ -1,6 +1,7 @@
 import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import fs from 'fs/promises';
 import path from 'path';
+import openurl from 'openurl';
 import childProcess from 'child_process';
 import CrosshairOverlay = require('./crosshair');
 
@@ -22,6 +23,7 @@ app.on('ready', () => {
         }
     });
 
+    window.setMenu(null);
     window.loadFile(path.join(app.getAppPath(), 'public', 'index.html'));
 
     window.on('closed', () => {
@@ -56,7 +58,7 @@ ipcMain.on('onload-crosshair-directory', (event, directory) => {
     customCrosshairsDir = directory;
     if (customCrosshairsDir && customCrosshair) {
         const selectedCrosshair = getSelectedCrosshairPath();
-        crosshair.setImage(selectedCrosshair);
+        crosshair.setImage(selectedCrosshair || '');
     }
 });
 
@@ -87,7 +89,7 @@ ipcMain.on('change-custom-crosshair', (event, name) => {
     customCrosshair = name;
     if (customCrosshairsDir && customCrosshair) {
         const selectedCrosshair = getSelectedCrosshairPath();
-        crosshair.setImage(selectedCrosshair);
+        crosshair.setImage(selectedCrosshair || '');
     }
 });
 
@@ -96,7 +98,7 @@ ipcMain.on('config', (event, newConfig: Config) => {
     crosshair.size = +config.size;
 
     const selectedCrosshair = getSelectedCrosshairPath();
-    crosshair.setImage(selectedCrosshair);
+    crosshair.setImage(selectedCrosshair || '');
 });
 
 ipcMain.on('change-hue', (event, hue) => {
@@ -122,7 +124,7 @@ ipcMain.on('destroy-crosshair', () => {
 
 ipcMain.on('show-crosshair', () => {
     const selectedCrosshair = getSelectedCrosshairPath();
-    crosshair.open(selectedCrosshair);
+    crosshair.open(selectedCrosshair || '');
     crosshair.show();
 });
 
@@ -163,4 +165,21 @@ ipcMain.on('refresh-crosshairs', async event => {
     } catch (err) {
         console.log(err);
     }
+});
+
+ipcMain.on('about-request', async event => {
+    const pkgPath = path.join(app.getAppPath(), 'package.json');
+    try {
+        const pkg = await fs.readFile(pkgPath, 'utf-8');
+        const pkgJson = JSON.parse(pkg);
+        event.reply('about-response', pkgJson);
+    } catch (err) {
+        console.error('Failed to read package.json:', err);
+        event.reply('about-response', { error: 'Failed to read package.json' });
+    }
+});
+
+ipcMain.on('download-updates', () => {
+    const url = 'https://github.com/YSSF8/crosshair-y/releases/latest';
+    openurl.open(url);
 });

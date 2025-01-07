@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 const promises_1 = __importDefault(require("fs/promises"));
 const path_1 = __importDefault(require("path"));
+const openurl_1 = __importDefault(require("openurl"));
 const child_process_1 = __importDefault(require("child_process"));
 const CrosshairOverlay = require("./crosshair");
 let window;
@@ -33,6 +34,7 @@ electron_1.app.on('ready', () => {
             contextIsolation: false
         }
     });
+    window.setMenu(null);
     window.loadFile(path_1.default.join(electron_1.app.getAppPath(), 'public', 'index.html'));
     window.on('closed', () => {
         crosshair.close();
@@ -56,7 +58,7 @@ electron_1.ipcMain.on('onload-crosshair-directory', (event, directory) => {
     customCrosshairsDir = directory;
     if (customCrosshairsDir && customCrosshair) {
         const selectedCrosshair = getSelectedCrosshairPath();
-        crosshair.setImage(selectedCrosshair);
+        crosshair.setImage(selectedCrosshair || '');
     }
 });
 let config;
@@ -85,14 +87,14 @@ electron_1.ipcMain.on('change-custom-crosshair', (event, name) => {
     customCrosshair = name;
     if (customCrosshairsDir && customCrosshair) {
         const selectedCrosshair = getSelectedCrosshairPath();
-        crosshair.setImage(selectedCrosshair);
+        crosshair.setImage(selectedCrosshair || '');
     }
 });
 electron_1.ipcMain.on('config', (event, newConfig) => {
     config = newConfig;
     crosshair.size = +config.size;
     const selectedCrosshair = getSelectedCrosshairPath();
-    crosshair.setImage(selectedCrosshair);
+    crosshair.setImage(selectedCrosshair || '');
 });
 electron_1.ipcMain.on('change-hue', (event, hue) => {
     crosshair.hue = +hue;
@@ -113,7 +115,7 @@ electron_1.ipcMain.on('destroy-crosshair', () => {
 });
 electron_1.ipcMain.on('show-crosshair', () => {
     const selectedCrosshair = getSelectedCrosshairPath();
-    crosshair.open(selectedCrosshair);
+    crosshair.open(selectedCrosshair || '');
     crosshair.show();
 });
 electron_1.ipcMain.on('hide-crosshair', () => {
@@ -155,3 +157,19 @@ electron_1.ipcMain.on('refresh-crosshairs', (event) => __awaiter(void 0, void 0,
         console.log(err);
     }
 }));
+electron_1.ipcMain.on('about-request', (event) => __awaiter(void 0, void 0, void 0, function* () {
+    const pkgPath = path_1.default.join(electron_1.app.getAppPath(), 'package.json');
+    try {
+        const pkg = yield promises_1.default.readFile(pkgPath, 'utf-8');
+        const pkgJson = JSON.parse(pkg);
+        event.reply('about-response', pkgJson);
+    }
+    catch (err) {
+        console.error('Failed to read package.json:', err);
+        event.reply('about-response', { error: 'Failed to read package.json' });
+    }
+}));
+electron_1.ipcMain.on('download-updates', () => {
+    const url = 'https://github.com/YSSF8/crosshair-y/releases/latest';
+    openurl_1.default.open(url);
+});

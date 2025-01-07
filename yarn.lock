@@ -114,6 +114,13 @@
   dependencies:
     undici-types "~6.19.2"
 
+"@types/openurl@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@types/openurl/-/openurl-1.0.3.tgz#17c196bae7d091037ebb36578b833c1289a64e52"
+  integrity sha512-rdWpxNve8iUBizep3BwjGzcdfk2XeXeeFiMwIgLN6dAKxCusfFC6H9XVvfPeNObRFpSgqI+HVmoG7UOB9HEnBQ==
+  dependencies:
+    "@types/node" "*"
+
 "@types/responselike@^1.0.0":
   version "1.0.3"
   resolved "https://registry.npmjs.org/@types/responselike/-/responselike-1.0.3.tgz"
@@ -763,6 +770,11 @@ once@^1.3.0, once@^1.3.1, once@^1.4.0:
   integrity sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==
   dependencies:
     wrappy "1"
+
+openurl@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/openurl/-/openurl-1.1.1.tgz#3875b4b0ef7a52c156f0db41d4609dbb0f94b387"
+  integrity sha512-d/gTkTb1i1GKz5k3XE3XFV/PxQ1k45zDqGP2OA7YhgsaLoqm6qRvARAZOFer1fcXritWlGBRCu/UgeS4HAnXAA==
 
 p-cancelable@^2.0.0:
   version "2.1.1"
