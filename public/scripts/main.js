@@ -21,6 +21,10 @@ const toggleCrosshair = document.getElementById('toggle-crosshair');
 const refreshDir = document.querySelector('.refresh-dir');
 const openDir = document.querySelector('.open-dir');
 
+if (localStorage.getItem('light-theme')) {
+    document.documentElement.classList.add('light-theme');
+}
+
 ipcRenderer.once('built-in-crosshairs-response', (event, crosshairs) => {
     const crosshairsToElements = crosshairs.reverse().map(crosshair => `
     <div class="crosshair">

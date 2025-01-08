@@ -8,6 +8,7 @@
     --scroll-bar-normal: #4e4e4e;
     --scroll-bar-hover: #555;
     --scroll-bar-active: #3a3a3a;
+    --icon: #fff;
 }
 
 @font-face {
@@ -22,6 +23,19 @@
 
 html {
     color-scheme: dark;
+}
+
+.light-theme {
+    color-scheme: light;
+    --primary-color: #f0f0f0;
+    --secondary-color: #e0e0e0;
+    --tertiary-color: #d0d0d0;
+    --line-color: #ccc;
+    --grayed-out: #444;
+    --scroll-bar-normal: #b0b0b0;
+    --scroll-bar-hover: #a0a0a0;
+    --scroll-bar-active: #c0c0c0;
+    --icon: #000;
 }
 
 body {
@@ -265,6 +279,10 @@ body {
             }
         }
     }
+}
+
+.icon {
+    fill: var(--icon);
 }
 
 ::-webkit-scrollbar {

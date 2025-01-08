@@ -9,6 +9,11 @@ settings.addEventListener('click', () => {
     frame.addEventListener('load', () => {
         const frameDoc = frame.contentDocument || frame.contentWindow.document;
         const frameBody = frameDoc.body;
+        const htmlElement = frameBody.parentElement;
+
+        if (localStorage.getItem('light-theme')) {
+            htmlElement.classList.add('light-theme');
+        }
 
         const resetButton = frameBody.querySelector('.reset');
         const closeButton = frameBody.querySelector('.close');
@@ -17,6 +22,7 @@ settings.addEventListener('click', () => {
         const setDirectory = frameBody.querySelector('#set-directory');
         const setDirectorySubText = setDirectory.querySelector('.sub-label');
         const removeDir = frameBody.querySelector('#remove-directory');
+        const themeToggle = frameBody.querySelector('#theme-toggle');
         const about = frameBody.querySelector('#about');
         const checkForUpdates = frameBody.querySelector('#check-for-updates');
 
@@ -100,6 +106,22 @@ settings.addEventListener('click', () => {
             openDir.classList.add('disabled');
 
             ipcRenderer.send('onload-crosshair-directory', null);
+        });
+
+        if (localStorage.getItem('light-theme')) {
+            themeToggle.removeAttribute('checked');
+        }
+
+        themeToggle.addEventListener('change', () => {
+            if (themeToggle.checked) {
+                document.documentElement.classList.remove('light-theme');
+                htmlElement.classList.remove('light-theme');
+                localStorage.removeItem('light-theme');
+            } else {
+                document.documentElement.classList.add('light-theme');
+                htmlElement.classList.add('light-theme');
+                localStorage.setItem('light-theme', true);
+            }
         });
 
         about.addEventListener('click', () => {
