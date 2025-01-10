@@ -48,6 +48,7 @@ ipcMain.on('built-in-crosshairs', async event => {
 type Config = {
     size: number;
     hue: number;
+    opacity: number;
     crosshair: string;
 }
 
@@ -84,7 +85,6 @@ function getSelectedCrosshairFilename() {
     }
 }
 
-
 ipcMain.on('change-custom-crosshair', (event, name) => {
     customCrosshair = name;
     if (customCrosshairsDir && customCrosshair) {
@@ -96,14 +96,21 @@ ipcMain.on('change-custom-crosshair', (event, name) => {
 ipcMain.on('config', (event, newConfig: Config) => {
     config = newConfig;
     crosshair.size = +config.size;
+    crosshair.opacity = +config.opacity;
 
     const selectedCrosshair = getSelectedCrosshairPath();
     crosshair.setImage(selectedCrosshair || '');
+    crosshair.applyOpacity();
 });
 
 ipcMain.on('change-hue', (event, hue) => {
     crosshair.hue = +hue;
     crosshair.applyHue();
+});
+
+ipcMain.on('change-opacity', (event, opacity) => {
+    crosshair.opacity = +opacity;
+    crosshair.applyOpacity();
 });
 
 ipcMain.on('change-crosshair', (event, name) => {

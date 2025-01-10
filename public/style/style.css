@@ -158,6 +158,13 @@ body {
   opacity: 0;
 }
 
+.group-title {
+  margin-left: calc(var(--default-px) * 2);
+  font-size: calc(var(--default-px) * 1.5);
+  font-weight: bold;
+  color: #04b4fc;
+}
+
 .group {
   display: flex;
   flex-direction: column;

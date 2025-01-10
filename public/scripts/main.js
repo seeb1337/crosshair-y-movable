@@ -5,6 +5,7 @@ ipcRenderer.send('built-in-crosshairs');
 const DEFAULT_CONFIG = {
     size: 40,
     hue: 0,
+    opacity: 1,
     crosshair: 'Simple.png'
 };
 let config = JSON.parse(localStorage.getItem('config')) || { ...DEFAULT_CONFIG };
@@ -13,6 +14,7 @@ ipcRenderer.send('built-in-crosshairs');
 ipcRenderer.send('onload-crosshair-directory', localStorage.getItem('crosshairs-directory') || null);
 ipcRenderer.send('change-custom-crosshair', localStorage.getItem('custom-crosshair') || null);
 ipcRenderer.send('config', config);
+ipcRenderer.send('change-opacity', config.opacity || 1);
 
 const container = document.querySelector('.container');
 const builtInSection = document.getElementById('built-in');

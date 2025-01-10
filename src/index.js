@@ -93,12 +93,18 @@ electron_1.ipcMain.on('change-custom-crosshair', (event, name) => {
 electron_1.ipcMain.on('config', (event, newConfig) => {
     config = newConfig;
     crosshair.size = +config.size;
+    crosshair.opacity = +config.opacity;
     const selectedCrosshair = getSelectedCrosshairPath();
     crosshair.setImage(selectedCrosshair || '');
+    crosshair.applyOpacity();
 });
 electron_1.ipcMain.on('change-hue', (event, hue) => {
     crosshair.hue = +hue;
     crosshair.applyHue();
+});
+electron_1.ipcMain.on('change-opacity', (event, opacity) => {
+    crosshair.opacity = +opacity;
+    crosshair.applyOpacity();
 });
 electron_1.ipcMain.on('change-crosshair', (event, name) => {
     var _a;

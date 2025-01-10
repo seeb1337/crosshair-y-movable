@@ -19,6 +19,7 @@ settings.addEventListener('click', () => {
         const closeButton = frameBody.querySelector('.close');
         const sizeRange = frameBody.querySelector('#size-range');
         const hueRange = frameBody.querySelector('#hue-range');
+        const opacityRange = frameBody.querySelector('#opacity-range');
         const setDirectory = frameBody.querySelector('#set-directory');
         const setDirectorySubText = setDirectory.querySelector('.sub-label');
         const removeDir = frameBody.querySelector('#remove-directory');
@@ -75,6 +76,14 @@ settings.addEventListener('click', () => {
             config.hue = hueRange.value;
             localStorage.setItem('config', JSON.stringify(config));
             ipcRenderer.send('change-hue', hueRange.value);
+        });
+
+        opacityRange.value = config.opacity || 1;
+
+        opacityRange.addEventListener('change', () => {
+            config.opacity = opacityRange.value;
+            localStorage.setItem('config', JSON.stringify(config));
+            ipcRenderer.send('change-opacity', opacityRange.value);
         });
 
         const crosshairsDirectory = localStorage.getItem('crosshairs-directory') || '';
@@ -143,6 +152,10 @@ settings.addEventListener('click', () => {
                                         {
                                             element: 'div',
                                             text: `Author: ${info.author}`
+                                        },
+                                        {
+                                            element: 'div',
+                                            text: `License: ${info.license}`
                                         }
                                     ]
                                 },

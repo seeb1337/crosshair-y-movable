@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     img.style.filter = `hue-rotate(${config.hue})` || '';
 });
 
-const SIMPLE_CURSOR = './crosshairs/Simple.png';
+const SIMPLE_CROSSHAIR = './crosshairs/Simple.png';
 
 ipcRenderer.on('crosshair-loaded', (event, path) => {
     img.src = path.replace('public/crosshairs', './crosshairs');
@@ -23,18 +23,22 @@ ipcRenderer.on('crosshair-loaded', (event, path) => {
         fetch(img.src)
             .then(res => {
                 if (!res.ok) {
-                    img.src = SIMPLE_CURSOR;
+                    img.src = SIMPLE_CROSSHAIR;
                 }
                 return res.blob();
             })
             .then(data => console.log('Data retreived successfully', data))
-            .catch(err => {
-                img.src = SIMPLE_CURSOR;
-                ipcRenderer.send('error', err);
+            .catch(() => {
+                img.src = SIMPLE_CROSSHAIR;
+                alert('An error occured while trying to load crosshair');
             });
     }
 });
 
 ipcRenderer.on('load-hue', (event, hue) => {
     img.style.filter = `hue-rotate(${hue}deg)`;
+});
+
+ipcRenderer.on('load-opacity', (event, opacity) => {
+    img.style.opacity = opacity;
 });

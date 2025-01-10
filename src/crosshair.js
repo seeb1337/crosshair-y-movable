@@ -14,6 +14,7 @@ class CrosshairOverlay {
         this.window = null;
         this.size = 40;
         this.hue = 0;
+        this.opacity = 1;
     }
     open(imagePath) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -49,6 +50,7 @@ class CrosshairOverlay {
                     var _a;
                     console.log('CrosshairOverlay window is ready to show');
                     (_a = this.window) === null || _a === void 0 ? void 0 : _a.show();
+                    this.applyOpacity();
                 });
                 this.window.webContents.on('did-finish-load', () => {
                     var _a;
@@ -66,6 +68,10 @@ class CrosshairOverlay {
     applyHue() {
         var _a;
         (_a = this.window) === null || _a === void 0 ? void 0 : _a.webContents.send('load-hue', this.hue);
+    }
+    applyOpacity() {
+        var _a;
+        (_a = this.window) === null || _a === void 0 ? void 0 : _a.webContents.send('load-opacity', this.opacity);
     }
     setImage(imagePath) {
         if (this.window) {
