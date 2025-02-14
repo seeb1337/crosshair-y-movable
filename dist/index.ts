@@ -2,8 +2,10 @@ import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import fs from 'fs/promises';
 import path from 'path';
 import openurl from 'openurl';
+import axios from 'axios';
 import childProcess from 'child_process';
 import CrosshairOverlay = require('./crosshair');
+import { arch, platform } from 'os';
 
 let window: BrowserWindow;
 const crosshair = new CrosshairOverlay();
@@ -186,7 +188,26 @@ ipcMain.on('about-request', async event => {
     }
 });
 
-ipcMain.on('download-updates', () => {
-    const url = 'https://github.com/YSSF8/crosshair-y/releases/latest';
-    openurl.open(url);
+ipcMain.on('download-updates', async () => {
+    try {
+        const url = 'https://api.github.com/repos/YSSF8/crosshair-y/releases/latest';
+        const response = await axios.get(url);
+        const data = await response.data;
+        const assets = data.assets;
+        const operatingSystem = `${platform()}-${arch()}`;
+        
+        const promises = assets.map((asset: any) => 
+            asset.browser_download_url.includes(operatingSystem)
+        );
+
+        const results = await Promise.all(promises);
+        const index = results.findIndex(Boolean);
+
+        if (index !== -1) {
+            openurl.open(assets[index].browser_download_url);
+        }
+    } catch (err) {
+        console.log(err);
+        dialog.showErrorBox('Error', (err as Error).message);
+    }
 });

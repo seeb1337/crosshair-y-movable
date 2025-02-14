@@ -39,7 +39,8 @@ class CustomToggle extends HTMLElement {
     }
 
     set checked(value) {
-        if (value) {
+        const isChecked = Boolean(value);
+        if (isChecked) {
             this.setAttribute('checked', '');
         } else {
             this.removeAttribute('checked');
@@ -49,6 +50,16 @@ class CustomToggle extends HTMLElement {
 
     toggle() {
         this.checked = !this.checked;
+        this._dispatchChangeEvent();
+    }
+
+    check() {
+        this.checked = true;
+        this._dispatchChangeEvent();
+    }
+
+    uncheck() {
+        this.checked = false;
         this._dispatchChangeEvent();
     }
 

@@ -16,8 +16,10 @@ const electron_1 = require("electron");
 const promises_1 = __importDefault(require("fs/promises"));
 const path_1 = __importDefault(require("path"));
 const openurl_1 = __importDefault(require("openurl"));
+const axios_1 = __importDefault(require("axios"));
 const child_process_1 = __importDefault(require("child_process"));
 const CrosshairOverlay = require("./crosshair");
+const os_1 = require("os");
 let window;
 const crosshair = new CrosshairOverlay();
 const CROSSHAIRS_DIR = path_1.default.join(electron_1.app.getAppPath(), 'public', 'crosshairs');
@@ -175,7 +177,22 @@ electron_1.ipcMain.on('about-request', (event) => __awaiter(void 0, void 0, void
         event.reply('about-response', { error: 'Failed to read package.json' });
     }
 }));
-electron_1.ipcMain.on('download-updates', () => {
-    const url = 'https://github.com/YSSF8/crosshair-y/releases/latest';
-    openurl_1.default.open(url);
-});
+electron_1.ipcMain.on('download-updates', () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const url = 'https://api.github.com/repos/YSSF8/crosshair-y/releases/latest';
+        const response = yield axios_1.default.get(url);
+        const data = yield response.data;
+        const assets = data.assets;
+        const operatingSystem = `${(0, os_1.platform)()}-${(0, os_1.arch)()}`;
+        const promises = assets.map((asset) => asset.browser_download_url.includes(operatingSystem));
+        const results = yield Promise.all(promises);
+        const index = results.findIndex(Boolean);
+        if (index !== -1) {
+            openurl_1.default.open(assets[index].browser_download_url);
+        }
+    }
+    catch (err) {
+        console.log(err);
+        electron_1.dialog.showErrorBox('Error', err.message);
+    }
+}));

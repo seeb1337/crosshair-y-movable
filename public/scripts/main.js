@@ -74,6 +74,10 @@ if (localStorage.getItem('crosshairs-directory')) {
     openDir.classList.remove('disabled');
 }
 
+if (localStorage.getItem('auto-updates')) {
+    updatesCheck(true);
+}
+
 ipcRenderer.send('onload-crosshair-directory', localStorage.getItem('crosshairs-directory') || null);
 ipcRenderer.on('custom-crosshairs-response', (event, crosshairs) => {
     let fileFormats = [];

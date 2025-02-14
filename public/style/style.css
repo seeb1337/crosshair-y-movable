@@ -39,6 +39,18 @@ html {
   --icon: #000;
 }
 
+.black-theme {
+  --primary-color: #000;
+  --secondary-color: #0a0a0a;
+  --tertiary-color: #141414;
+  --line-color: #1e1e1e;
+  --grayed-out: #333;
+  --scroll-bar-normal: #2a2a2a;
+  --scroll-bar-hover: #3a3a3a;
+  --scroll-bar-active: #1a1a1a;
+  --icon: #fff;
+}
+
 body {
   background-color: var(--primary-color);
   margin: 0;
