@@ -57,6 +57,21 @@ body {
   padding: 0;
   overflow-x: hidden;
 }
+body.body-settings {
+  overflow: hidden !important;
+  height: 100vh;
+}
+body.body-settings .container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+body.body-settings .section {
+  flex: 1;
+  overflow-y: auto;
+  padding: calc(var(--default-px) * 2) var(--default-px) 0;
+  padding-bottom: calc(var(--default-px) * 2);
+}
 
 .container {
   transition: translate 200ms cubic-bezier(0.52, 0.87, 0.45, 0.93);

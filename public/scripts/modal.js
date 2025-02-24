@@ -1,8 +1,4 @@
 class Modal {
-    /**
-     * Create a modal
-     * @param {Record<string, any>[]} content - Add contents to the modal
-     */
     constructor(content) {
         this.content = content;
 
@@ -14,41 +10,51 @@ class Modal {
         this.modal.classList.add('modal-foreground');
         this.modalBackground.appendChild(this.modal);
 
-        const bounceKeyframes = [
-            { transform: 'scale(0.9)', opacity: 0 },
-            { transform: 'scale(1.1)', opacity: 1, offset: 0.5 },
+        this.modal.animate([
+            { transform: 'scale(0.7)', opacity: 0 },
             { transform: 'scale(1)', opacity: 1 }
-        ];
-
-        const bounceAnimationOptions = {
-            duration: 600,
-            easing: 'cubic-bezier(0.68, -0.55, 0.27, 1.55)',
-            fill: 'forwards'
-        };
-
-        this.modal.animate(bounceKeyframes, bounceAnimationOptions);
-
-        const fadeInKeyframes = [
-            { opacity: 0 },
-            { opacity: 1 }
-        ];
-
-        const fadeInOptions = {
+        ], {
             duration: 300,
-            easing: 'ease-in',
+            easing: 'cubic-bezier(0.18, 0.89, 0.32, 1.28)',
             fill: 'forwards'
-        };
+        });
 
-        this.modalBackground.animate(fadeInKeyframes, fadeInOptions);
+        this.modalBackground.animate([
+            { opacity: 0, backdropFilter: 'blur(0px)' },
+            { opacity: 1, backdropFilter: 'blur(4px)' }
+        ], {
+            duration: 250,
+            easing: 'ease-out',
+            fill: 'forwards'
+        });
 
         this._createElements(this.modal, this.content);
     }
 
-    /**
-     * Recursively create elements and their children
-     * @param {HTMLElement} parent - The parent element to append children to
-     * @param {Record<string, any>[]} elements - The elements to create
-     */
+    remove() {
+        const bgAnimation = this.modalBackground.animate([
+            { opacity: 1, backdropFilter: 'blur(4px)' },
+            { opacity: 0, backdropFilter: 'blur(0px)' }
+        ], {
+            duration: 200,
+            easing: 'ease-in',
+            fill: 'forwards'
+        });
+
+        const modalAnimation = this.modal.animate([
+            { transform: 'scale(1)', opacity: 1 },
+            { transform: 'scale(0.97)', opacity: 0 }
+        ], {
+            duration: 200,
+            easing: 'ease-in',
+            fill: 'forwards'
+        });
+
+        Promise.all([bgAnimation.finished, modalAnimation.finished]).then(() => {
+            this.modalBackground.remove();
+        });
+    }
+
     _createElements(parent, elements) {
         for (let i = 0; i < elements.length; i++) {
             const elementConfig = elements[i];
@@ -73,23 +79,5 @@ class Modal {
 
             parent.appendChild(item);
         }
-    }
-
-    remove() {
-        const fadeOutKeyframes = [
-            { opacity: 1 },
-            { opacity: 0 }
-        ];
-
-        const fadeOutOptions = {
-            duration: 300,
-            easing: 'ease-out',
-            fill: 'forwards'
-        };
-
-        this.modalBackground.animate(fadeOutKeyframes, fadeOutOptions).onfinish = () => {
-
-            this.modalBackground.remove();
-        };
     }
 }

@@ -49,6 +49,18 @@ settings.addEventListener('click', () => {
 
                 ipcRenderer.send('onload-crosshair-directory', null);
 
+                if (!themeToggle.checked) {
+                    document.documentElement.classList.remove('light-theme');
+                    htmlElement.classList.remove('light-theme');
+                    localStorage.removeItem('light-theme');
+                    themeToggle.checked = true;
+                }
+
+                if (autoUpdater.checked) {
+                    localStorage.removeItem('auto-updates');
+                    autoUpdater.checked = false;
+                }
+
                 refreshOverlay();
             });
         }

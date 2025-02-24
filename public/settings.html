@@ -6,7 +6,7 @@
     <title>Settings</title>
     <link rel="stylesheet" href="./style/style.css">
 </head>
-<body>
+<body class="body-settings">
     <div class="container">
         <div class="header">
             <h2>Settings</h2>
@@ -25,19 +25,19 @@
                 <div class="item">
                     <div class="label">Size</div>
                     <div class="value">
-                        <input type="range" min="20" max="120" value="40" id="size-range">
+                        <custom-range min="20" max="120" value="40" id="size-range"></custom-range>
                     </div>
                 </div>
                 <div class="item">
                     <div class="label">Rotate hue</div>
                     <div class="value">
-                        <input type="range" min="0" max="180" value="0" id="hue-range">
+                        <custom-range min="0" max="180" value="0" id="hue-range"></custom-range>
                     </div>
                 </div>
                 <div class="item">
                     <div class="label">Opacity</div>
                     <div class="value">
-                        <input type="range" min="0.3" max="1" step="0.1" value="1" id="opacity-range">
+                        <custom-range min="0.3" max="1" step="0.1" value="1" id="opacity-range"></custom-range>
                     </div>
                 </div>
             </div>
@@ -60,7 +60,7 @@
             <div class="group">
                 <div class="item">
                     <div class="label">
-                        <div>Dark Theme</div>
+                        <div>Dark theme</div>
                         <div class="sub-label">Makes the UI dark, easier on the eyes</div>
                     </div>
                     <div class="value">

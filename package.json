@@ -1,7 +1,7 @@
 {
   "name": "crosshair-y",
   "productName": "Crosshair Y",
-  "version": "1.4",
+  "version": "1.5",
   "main": "src/index.js",
   "scripts": {
     "start": "electron .",
@@ -15,7 +15,7 @@
   "description": "A free and open-source alternative to Crosshair X",
   "dependencies": {
     "axios": "^1.7.9",
-    "electron": "^33.3.1",
+    "electron": "^34.2.0",
     "openurl": "^1.1.1"
   },
   "devDependencies": {

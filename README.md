@@ -84,6 +84,7 @@ The built applications will be located in the `build/` directory.
 3. **Customizing**:
    - **Size**: Adjust the size slider to change the crosshair size.
    - **Hue**: Modify the hue slider to change the crosshair color.
+   - **Opacity**: Adjust the opacity slider to change the crosshair visibility level.
 4. **Toggling Visibility**: Use the toggle switch to show or hide the crosshair overlay.
 5. **Settings**: Access the settings window to reset configurations or manage crosshair directories.
 
@@ -93,6 +94,7 @@ Crosshair Y stores user configurations in the `localStorage`. You can modify set
 
 - **Crosshair Size**: Adjust using the size range slider in the settings.
 - **Hue**: Change the crosshair color hue via the hue range slider.
+- **Opacity**: Adjust using the opacity range slider in the settings.
 - **Crosshair Directory**: Select a custom directory containing your crosshair `.png` files.
 
 ### Resetting to Default
