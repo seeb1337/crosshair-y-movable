@@ -50,6 +50,7 @@ ipcMain.on('built-in-crosshairs', async event => {
 type Config = {
     size: number;
     hue: number;
+    rotation: number;
     opacity: number;
     crosshair: string;
 }
@@ -108,6 +109,16 @@ ipcMain.on('config', (event, newConfig: Config) => {
 ipcMain.on('change-hue', (event, hue) => {
     crosshair.hue = +hue;
     crosshair.applyHue();
+});
+
+ipcMain.on('change-size', (event, size) => {
+    crosshair.size = +size;
+    crosshair.applySize();
+});
+
+ipcMain.on('change-rotation', (event, rotation) => {
+    crosshair.rotation = +rotation;
+    crosshair.applyRotation();
 });
 
 ipcMain.on('change-opacity', (event, opacity) => {

@@ -39,6 +39,10 @@ ipcRenderer.on('load-hue', (event, hue) => {
     img.style.filter = `hue-rotate(${hue}deg)`;
 });
 
+ipcRenderer.on('load-rotation', (event, rotation) => {
+    img.style.rotate = `${rotation}deg`;
+});
+
 ipcRenderer.on('load-opacity', (event, opacity) => {
     img.style.opacity = opacity;
 });

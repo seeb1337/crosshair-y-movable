@@ -5,6 +5,7 @@ ipcRenderer.send('built-in-crosshairs');
 const DEFAULT_CONFIG = {
     size: 40,
     hue: 0,
+    rotation: 0,
     opacity: 1,
     crosshair: 'Simple.png'
 };
@@ -47,6 +48,9 @@ ipcRenderer.once('built-in-crosshairs-response', (event, crosshairs) => {
 
             config.crosshair = name;
             localStorage.setItem('config', JSON.stringify(config));
+
+            ipcRenderer.send('change-hue', config.hue);
+            ipcRenderer.send('change-rotation', config.rotation);
         });
     });
 });
@@ -62,6 +66,7 @@ toggleCrosshair.addEventListener('change', () => {
 });
 
 ipcRenderer.send('change-hue', config.hue);
+ipcRenderer.send('change-rotation', config.rotation);
 
 refreshDir.addEventListener('click', () => {
     ipcRenderer.send('refresh-crosshairs');
@@ -132,6 +137,7 @@ openDir.addEventListener('click', () => {
 function refreshOverlay() {
     ipcRenderer.send('destroy-crosshair');
     ipcRenderer.send('change-hue', config.hue);
+    ipcRenderer.send('change-rotation', config.rotation);
     ipcRenderer.send('change-size', config.size);
     ipcRenderer.send(toggleCrosshair.checked ? 'show-crosshair' : 'hide-crosshair');
 }

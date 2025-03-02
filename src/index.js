@@ -104,6 +104,14 @@ electron_1.ipcMain.on('change-hue', (event, hue) => {
     crosshair.hue = +hue;
     crosshair.applyHue();
 });
+electron_1.ipcMain.on('change-size', (event, size) => {
+    crosshair.size = +size;
+    crosshair.applySize();
+});
+electron_1.ipcMain.on('change-rotation', (event, rotation) => {
+    crosshair.rotation = +rotation;
+    crosshair.applyRotation();
+});
 electron_1.ipcMain.on('change-opacity', (event, opacity) => {
     crosshair.opacity = +opacity;
     crosshair.applyOpacity();

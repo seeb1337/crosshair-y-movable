@@ -14,6 +14,7 @@ class CrosshairOverlay {
         this.window = null;
         this.size = 40;
         this.hue = 0;
+        this.rotation = 0;
         this.opacity = 1;
     }
     open(imagePath) {
@@ -68,6 +69,26 @@ class CrosshairOverlay {
     applyHue() {
         var _a;
         (_a = this.window) === null || _a === void 0 ? void 0 : _a.webContents.send('load-hue', this.hue);
+    }
+    applyRotation() {
+        var _a;
+        (_a = this.window) === null || _a === void 0 ? void 0 : _a.webContents.send('load-rotation', this.rotation);
+    }
+    applySize() {
+        if (this.window) {
+            const primaryDisplay = electron_1.screen.getPrimaryDisplay();
+            const { x: boundsX, y: boundsY, width: boundsWidth, height: boundsHeight } = primaryDisplay.bounds;
+            const centerX = boundsX + boundsWidth / 2;
+            const centerY = boundsY + boundsHeight / 2;
+            const x = Math.round(centerX - this.size / 2);
+            const y = Math.round(centerY - this.size / 2);
+            this.window.setBounds({
+                x: x,
+                y: y,
+                width: this.size,
+                height: this.size
+            });
+        }
     }
     applyOpacity() {
         var _a;

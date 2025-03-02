@@ -19,6 +19,7 @@ settings.addEventListener('click', () => {
         const closeButton = frameBody.querySelector('.close');
         const sizeRange = frameBody.querySelector('#size-range');
         const hueRange = frameBody.querySelector('#hue-range');
+        const rotateRange = frameBody.querySelector('#rotate-range');
         const opacityRange = frameBody.querySelector('#opacity-range');
         const setDirectory = frameBody.querySelector('#set-directory');
         const setDirectorySubText = setDirectory.querySelector('.sub-label');
@@ -37,6 +38,8 @@ settings.addEventListener('click', () => {
 
                 sizeRange.value = 40;
                 hueRange.value = 0;
+                rotateRange.value = 0;
+                opacityRange.value = 1;
 
                 ipcRenderer.send('config', config);
                 ipcRenderer.send('change-hue', hueRange.value);
@@ -76,29 +79,43 @@ settings.addEventListener('click', () => {
         }
 
         sizeRange.value = config.size || 40;
+        sizeRange.title = sizeRange.value;
 
         sizeRange.addEventListener('change', () => {
             config.size = sizeRange.value;
             localStorage.setItem('config', JSON.stringify(config));
-            ipcRenderer.send('config', config);
-            refreshOverlay();
-            ipcRenderer.send('change-hue', hueRange.value);
+            ipcRenderer.send('change-size', sizeRange.value);
+            sizeRange.title = sizeRange.value;
         });
 
         hueRange.value = config.hue || 0;
+        hueRange.title = hueRange.value;
 
         hueRange.addEventListener('change', () => {
             config.hue = hueRange.value;
             localStorage.setItem('config', JSON.stringify(config));
             ipcRenderer.send('change-hue', hueRange.value);
+            hueRange.title = hueRange.value;
+        });
+
+        rotateRange.value = config.rotation || 0;
+        rotateRange.title = rotateRange.value;
+
+        rotateRange.addEventListener('change', () => {
+            config.rotation = rotateRange.value;
+            localStorage.setItem('config', JSON.stringify(config));
+            ipcRenderer.send('change-rotation', rotateRange.value);
+            rotateRange.title = rotateRange.value;
         });
 
         opacityRange.value = config.opacity || 1;
+        opacityRange.title = parseFloat(opacityRange.value.toFixed(1));
 
         opacityRange.addEventListener('change', () => {
             config.opacity = opacityRange.value;
             localStorage.setItem('config', JSON.stringify(config));
             ipcRenderer.send('change-opacity', opacityRange.value);
+            opacityRange.title = parseFloat(opacityRange.value.toFixed(1));
         });
 
         const crosshairsDirectory = localStorage.getItem('crosshairs-directory') || '';
