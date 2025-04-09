@@ -1,5 +1,17 @@
 const settings = document.querySelector('.settings');
 
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 settings.addEventListener('click', () => {
     const frame = document.createElement('iframe');
     frame.src = './settings.html';
@@ -31,25 +43,53 @@ settings.addEventListener('click', () => {
 
         autoUpdater.checked = localStorage.getItem('auto-updates') !== null;
 
+        const INPUT_DEBOUNCE_DELAY = 50;
+
+        const debouncedSendSize = debounce(value => {
+            ipcRenderer.send('change-size', value);
+            console.log('Debounced size change sent:', value);
+        }, INPUT_DEBOUNCE_DELAY);
+
+        const debouncedSendHue = debounce(value => {
+            ipcRenderer.send('change-hue', value);
+            console.log('Debounced hue change sent:', value);
+        }, INPUT_DEBOUNCE_DELAY);
+
+        const debouncedSendRotation = debounce(value => {
+            ipcRenderer.send('change-rotation', value);
+            console.log('Debounced rotation change sent:', value);
+        }, INPUT_DEBOUNCE_DELAY);
+
+        const debouncedSendOpacity = debounce(value => {
+            ipcRenderer.send('change-opacity', value);
+            console.log('Debounced opacity change sent:', value);
+        }, INPUT_DEBOUNCE_DELAY);
+
         if (resetButton) {
             resetButton.addEventListener('click', () => {
                 localStorage.removeItem('config');
                 config = { ...DEFAULT_CONFIG };
 
-                sizeRange.value = 40;
-                hueRange.value = 0;
-                rotateRange.value = 0;
-                opacityRange.value = 1;
+                sizeRange.value = config.size;
+                hueRange.value = config.hue;
+                rotateRange.value = config.rotation;
+                opacityRange.value = config.opacity;
+
+                sizeRange.title = sizeRange.value;
+                hueRange.title = hueRange.value;
+                rotateRange.title = rotateRange.value;
+                opacityRange.title = parseFloat(opacityRange.value.toFixed(1));
 
                 ipcRenderer.send('config', config);
-                ipcRenderer.send('change-hue', hueRange.value);
+                ipcRenderer.send('change-size', config.size);
+                ipcRenderer.send('change-hue', config.hue);
+                ipcRenderer.send('change-rotation', config.rotation);
+                ipcRenderer.send('change-opacity', config.opacity);
 
                 localStorage.removeItem('crosshairs-directory');
-
                 setDirectorySubText.textContent = 'No directory';
                 openDir.title = 'No directory';
                 openDir.classList.add('disabled');
-
                 ipcRenderer.send('onload-crosshair-directory', null);
 
                 if (!themeToggle.checked) {
@@ -71,7 +111,11 @@ settings.addEventListener('click', () => {
         if (closeButton) {
             closeButton.addEventListener('click', () => {
                 frame.classList.add('full-animation');
-                container.classList.remove('full-animation');
+                if (typeof container !== 'undefined') {
+                    container.classList.remove('full-animation');
+                } else {
+                    console.warn("'container' element not found for animation.");
+                }
                 setTimeout(() => {
                     frame.remove();
                 }, 200);
@@ -80,17 +124,16 @@ settings.addEventListener('click', () => {
 
         sizeRange.value = config.size || 40;
         sizeRange.title = sizeRange.value;
-
         sizeRange.addEventListener('change', () => {
-            config.size = sizeRange.value;
+            const currentValue = sizeRange.value;
+            config.size = currentValue;
+            sizeRange.title = currentValue;
             localStorage.setItem('config', JSON.stringify(config));
-            ipcRenderer.send('change-size', sizeRange.value);
-            sizeRange.title = sizeRange.value;
+            debouncedSendSize(currentValue);
         });
 
         hueRange.value = config.hue || 0;
         hueRange.title = hueRange.value;
-
         hueRange.addEventListener('change', () => {
             config.hue = hueRange.value;
             localStorage.setItem('config', JSON.stringify(config));
@@ -100,7 +143,6 @@ settings.addEventListener('click', () => {
 
         rotateRange.value = config.rotation || 0;
         rotateRange.title = rotateRange.value;
-
         rotateRange.addEventListener('change', () => {
             config.rotation = rotateRange.value;
             localStorage.setItem('config', JSON.stringify(config));
@@ -110,7 +152,6 @@ settings.addEventListener('click', () => {
 
         opacityRange.value = config.opacity || 1;
         opacityRange.title = parseFloat(opacityRange.value.toFixed(1));
-
         opacityRange.addEventListener('change', () => {
             config.opacity = opacityRange.value;
             localStorage.setItem('config', JSON.stringify(config));
@@ -128,13 +169,17 @@ settings.addEventListener('click', () => {
 
         setDirectory.addEventListener('click', () => {
             ipcRenderer.send('open-folder-dialog');
-            ipcRenderer.on('custom-crosshairs-directory', (event, directory) => {
+            ipcRenderer.once('custom-crosshairs-directory', (event, directory) => {
                 localStorage.setItem('crosshairs-directory', directory);
 
                 const dir = localStorage.getItem('crosshairs-directory');
                 setDirectorySubText.textContent = dir;
-                openDir.title = dir;
-                openDir.classList.remove('disabled');
+                if (typeof openDir !== 'undefined') {
+                    openDir.title = dir;
+                    openDir.classList.remove('disabled');
+                } else {
+                    console.warn("'openDir' element not found.");
+                }
 
                 ipcRenderer.send('onload-crosshair-directory', localStorage.getItem('crosshairs-directory') || null);
             });
@@ -143,25 +188,30 @@ settings.addEventListener('click', () => {
         removeDir.addEventListener('click', () => {
             localStorage.removeItem('crosshairs-directory');
             setDirectorySubText.textContent = 'No directory';
-            openDir.title = 'No directory';
-            openDir.classList.add('disabled');
-
+            if (typeof openDir !== 'undefined') {
+                openDir.title = 'No directory';
+                openDir.classList.add('disabled');
+            } else {
+                console.warn("'openDir' element not found.");
+            }
             ipcRenderer.send('onload-crosshair-directory', null);
         });
 
         if (localStorage.getItem('light-theme')) {
             themeToggle.removeAttribute('checked');
+        } else {
+            themeToggle.setAttribute('checked', '');
         }
 
         themeToggle.addEventListener('change', () => {
-            if (themeToggle.checked) {
+            if (!themeToggle.checked) {
+                document.documentElement.classList.add('light-theme');
+                htmlElement.classList.add('light-theme');
+                localStorage.setItem('light-theme', 'true');
+            } else {
                 document.documentElement.classList.remove('light-theme');
                 htmlElement.classList.remove('light-theme');
                 localStorage.removeItem('light-theme');
-            } else {
-                document.documentElement.classList.add('light-theme');
-                htmlElement.classList.add('light-theme');
-                localStorage.setItem('light-theme', true);
             }
         });
 
