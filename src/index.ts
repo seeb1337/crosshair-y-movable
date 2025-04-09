@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, globalShortcut } from 'electron';
 import fs from 'fs/promises';
 import path from 'path';
 import openurl from 'openurl';
@@ -27,6 +27,10 @@ app.on('ready', () => {
 
     window.setMenu(null);
     window.loadFile(path.join(app.getAppPath(), 'public', 'index.html'));
+
+    globalShortcut.register('Ctrl+Shift+I', () => {
+        window.webContents?.openDevTools();
+    });
 
     window.on('closed', () => {
         crosshair.close();
