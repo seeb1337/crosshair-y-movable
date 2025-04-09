@@ -37,11 +37,27 @@ settings.addEventListener('click', () => {
         const setDirectorySubText = setDirectory.querySelector('.sub-label');
         const removeDir = frameBody.querySelector('#remove-directory');
         const themeToggle = frameBody.querySelector('#theme-toggle');
+        const reducedMotionToggle = frameBody.querySelector('#reduced-motion-toggle');
         const about = frameBody.querySelector('#about');
         const checkForUpdates = frameBody.querySelector('#check-for-updates');
         const autoUpdater = frameBody.querySelector('#auto-updates-toggle');
 
-        autoUpdater.checked = localStorage.getItem('auto-updates') !== null;
+        if (localStorage.getItem('light-theme') === 'true') {
+            htmlElement.classList.add('light-theme');
+            document.documentElement.classList.add('light-theme');
+            themeToggle.checked = false;
+        } else {
+            themeToggle.checked = true;
+        }
+
+        const prefersReducedMotion = localStorage.getItem('reduced-motion') === 'true';
+        reducedMotionToggle.checked = prefersReducedMotion;
+        if (prefersReducedMotion) {
+            htmlElement.classList.add('reduced-motion');
+            document.documentElement.classList.add('reduced-motion');
+        }
+
+        autoUpdater.checked = localStorage.getItem('auto-updates') === 'true';
 
         const INPUT_DEBOUNCE_DELAY = 50;
 
@@ -50,25 +66,10 @@ settings.addEventListener('click', () => {
             console.log('Debounced size change sent:', value);
         }, INPUT_DEBOUNCE_DELAY);
 
-        const debouncedSendHue = debounce(value => {
-            ipcRenderer.send('change-hue', value);
-            console.log('Debounced hue change sent:', value);
-        }, INPUT_DEBOUNCE_DELAY);
-
-        const debouncedSendRotation = debounce(value => {
-            ipcRenderer.send('change-rotation', value);
-            console.log('Debounced rotation change sent:', value);
-        }, INPUT_DEBOUNCE_DELAY);
-
-        const debouncedSendOpacity = debounce(value => {
-            ipcRenderer.send('change-opacity', value);
-            console.log('Debounced opacity change sent:', value);
-        }, INPUT_DEBOUNCE_DELAY);
-
         if (resetButton) {
             resetButton.addEventListener('click', () => {
                 localStorage.removeItem('config');
-                config = { ...DEFAULT_CONFIG };
+                config = { ...(typeof DEFAULT_CONFIG !== 'undefined' ? DEFAULT_CONFIG : { size: 40, hue: 0, rotation: 0, opacity: 1, crosshair: '' /* Add default crosshair */}) };
 
                 sizeRange.value = config.size;
                 hueRange.value = config.hue;
@@ -78,7 +79,7 @@ settings.addEventListener('click', () => {
                 sizeRange.title = sizeRange.value;
                 hueRange.title = hueRange.value;
                 rotateRange.title = rotateRange.value;
-                opacityRange.title = parseFloat(opacityRange.value.toFixed(1));
+                opacityRange.title = parseFloat(opacityRange.value).toFixed(1);
 
                 ipcRenderer.send('config', config);
                 ipcRenderer.send('change-size', config.size);
@@ -88,21 +89,27 @@ settings.addEventListener('click', () => {
 
                 localStorage.removeItem('crosshairs-directory');
                 setDirectorySubText.textContent = 'No directory';
-                openDir.title = 'No directory';
-                openDir.classList.add('disabled');
+                if (typeof openDir !== 'undefined') { openDir.title = 'No directory'; openDir.classList.add('disabled'); }
                 ipcRenderer.send('onload-crosshair-directory', null);
 
-                if (!themeToggle.checked) {
+                if (localStorage.getItem('light-theme') === 'true') {
                     document.documentElement.classList.remove('light-theme');
                     htmlElement.classList.remove('light-theme');
                     localStorage.removeItem('light-theme');
-                    themeToggle.checked = true;
                 }
+                themeToggle.checked = true;
 
-                if (autoUpdater.checked) {
-                    localStorage.removeItem('auto-updates');
-                    autoUpdater.checked = false;
+                if (localStorage.getItem('reduced-motion') === 'true') {
+                    document.documentElement.classList.remove('reduced-motion');
+                    htmlElement.classList.remove('reduced-motion');
+                    localStorage.removeItem('reduced-motion');
                 }
+                reducedMotionToggle.checked = false;
+
+                if (localStorage.getItem('auto-updates') === 'true') {
+                    localStorage.removeItem('auto-updates');
+                }
+                 autoUpdater.checked = false;
 
                 refreshOverlay();
             });
@@ -212,6 +219,18 @@ settings.addEventListener('click', () => {
                 document.documentElement.classList.remove('light-theme');
                 htmlElement.classList.remove('light-theme');
                 localStorage.removeItem('light-theme');
+            }
+        });
+
+        reducedMotionToggle.addEventListener('change', () => {
+            if (reducedMotionToggle.checked) {
+                localStorage.setItem('reduced-motion', 'true');
+                htmlElement.classList.add('reduced-motion');
+                document.documentElement.classList.add('reduced-motion');
+            } else {
+                localStorage.removeItem('reduced-motion');
+                htmlElement.classList.remove('reduced-motion');
+                document.documentElement.classList.remove('reduced-motion');
             }
         });
 

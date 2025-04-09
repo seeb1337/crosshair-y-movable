@@ -29,6 +29,10 @@
 html {
   color-scheme: dark;
 }
+html.reduced-motion * {
+  transition: none !important;
+  animation: none !important;
+}
 
 .light-theme {
   color-scheme: light;

@@ -28,6 +28,11 @@
 
 html {
     color-scheme: dark;
+    
+    &.reduced-motion * {
+        transition: none !important;
+        animation: none !important;
+    }
 }
 
 .light-theme {
@@ -53,13 +58,13 @@ body {
     &.body-settings {
         overflow: hidden !important;
         height: 100vh;
-
+        
         .container {
             height: 100%;
             display: flex;
             flex-direction: column;
         }
-
+        
         .section {
             flex: 1;
             overflow-y: auto;
