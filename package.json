@@ -2,7 +2,7 @@
   "name": "crosshair-y",
   "productName": "Crosshair Y",
   "version": "2.0",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "start": "electron .",
     "build:win32": "electron-packager . crosshair-y --platform=win32 --arch=x64 --out=build/ --overwrite --icon=icon.ico",
