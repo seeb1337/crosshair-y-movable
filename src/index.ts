@@ -43,6 +43,12 @@ app.on('ready', () => {
         window.webContents?.openDevTools()
     );
 
+    globalShortcut.register('Alt+Shift+T', () => {
+        if (window && !window.isDestroyed()) {
+            window.webContents.send('tray-toggle');
+        }
+    });
+
     const iconPath = path.join(__dirname, '..', '/icon.png');
     const trayIcon = nativeImage.createFromPath(iconPath).resize({ width: 16 });
     tray = new Tray(trayIcon);
