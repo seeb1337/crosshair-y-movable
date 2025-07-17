@@ -43,7 +43,7 @@ app.on('ready', () => {
         window.webContents?.openDevTools()
     );
 
-    const iconPath = path.join(app.getAppPath(), '..', '/icon.png');
+    const iconPath = path.join(__dirname, '..', '/icon.png');
     const trayIcon = nativeImage.createFromPath(iconPath).resize({ width: 16 });
     tray = new Tray(trayIcon);
 
