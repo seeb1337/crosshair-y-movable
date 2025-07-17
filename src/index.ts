@@ -43,17 +43,7 @@ app.on('ready', () => {
         window.webContents?.openDevTools()
     );
 
-<<<<<<< HEAD
-    globalShortcut.register('Alt+Shift+T', () => {
-        if (window && !window.isDestroyed()) {
-            window.webContents.send('tray-toggle');
-        }
-    });
-
     const iconPath = path.join(__dirname, '..', '/icon.png');
-=======
-    const iconPath = path.join(app.getAppPath(), '..', '/icon.png');
->>>>>>> parent of 67668fe (Fix icon issue with system tray)
     const trayIcon = nativeImage.createFromPath(iconPath).resize({ width: 16 });
     tray = new Tray(trayIcon);
 
