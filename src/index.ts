@@ -49,8 +49,14 @@ app.on('ready', () => {
 
     const contextMenu = Menu.buildFromTemplate([
         {
-            label: 'Show',
-            click: () => showMainWindow()
+            label: 'Show/Hide',
+            click: () => {
+                if (window.isVisible() && !window.isMinimized()) {
+                    window.hide();
+                } else {
+                    showMainWindow();
+                }
+            }
         },
         {
             label: 'Toggle',
