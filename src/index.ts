@@ -1,4 +1,13 @@
-import { app, BrowserWindow, dialog, ipcMain, globalShortcut } from 'electron';
+import {
+    app,
+    BrowserWindow,
+    dialog,
+    ipcMain,
+    globalShortcut,
+    Tray,
+    Menu,
+    nativeImage
+} from 'electron';
 import fs from 'fs/promises';
 import path from 'path';
 import openurl from 'openurl';
@@ -8,6 +17,7 @@ import CrosshairOverlay = require('./crosshair');
 import { arch, platform } from 'os';
 
 let window: BrowserWindow;
+let tray: Tray;
 const crosshair = new CrosshairOverlay();
 const CROSSHAIRS_DIR = path.join(app.getAppPath(), 'public', 'crosshairs');
 
@@ -19,6 +29,7 @@ app.on('ready', () => {
         minHeight: 393,
         autoHideMenuBar: true,
         icon: path.join(app.getAppPath(), '..', '/icon.ico'),
+        show: false,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false
@@ -28,23 +39,68 @@ app.on('ready', () => {
     window.setMenu(null);
     window.loadFile(path.join(app.getAppPath(), 'public', 'index.html'));
 
-    globalShortcut.register('Ctrl+Shift+I', () => {
-        window.webContents?.openDevTools();
+    globalShortcut.register('Ctrl+Shift+I', () =>
+        window.webContents?.openDevTools()
+    );
+
+    const iconPath = path.join(app.getAppPath(), '..', '/icon.png');
+    const trayIcon = nativeImage.createFromPath(iconPath).resize({ width: 16 });
+    tray = new Tray(trayIcon);
+
+    const contextMenu = Menu.buildFromTemplate([
+        {
+            label: 'Show',
+            click: () => showMainWindow()
+        },
+        {
+            label: 'Toggle',
+            click: () => toggleCrosshair()
+        },
+        {
+            label: 'Quit',
+            click: () => {
+                window.removeAllListeners('close');
+                crosshair.close();
+                app.quit();
+            }
+        }
+    ]);
+
+    tray.setToolTip('Crosshair Y');
+    tray.setContextMenu(contextMenu);
+
+    tray.on('click', () => showMainWindow());
+
+    window.on('close', (e) => {
+        e.preventDefault();
+        window.hide();
     });
 
-    window.on('closed', () => {
-        crosshair.close();
-    });
+    showMainWindow();
 });
 
-let builtInCrosshairs: string[];
+function showMainWindow() {
+    if (window.isMinimized()) window.restore();
+    window.show();
+    window.focus();
+}
 
-ipcMain.on('built-in-crosshairs', async event => {
+function toggleCrosshair() {
+    if (crosshair.window?.isVisible()) {
+        crosshair.hide();
+    } else {
+        const selected = getSelectedCrosshairPath();
+        crosshair.open(selected || '');
+        crosshair.show();
+    }
+}
+
+let builtInCrosshairs: string[];
+ipcMain.on('built-in-crosshairs', async (event) => {
     try {
         const files = await fs.readdir(CROSSHAIRS_DIR);
-        const pngFiles = files.filter(file => path.extname(file) === '.png');
+        const pngFiles = files.filter((file) => path.extname(file) === '.png');
         event.reply('built-in-crosshairs-response', pngFiles);
-
         builtInCrosshairs = pngFiles;
     } catch (err) {
         console.log(err);
@@ -57,7 +113,7 @@ type Config = {
     rotation: number;
     opacity: number;
     crosshair: string;
-}
+};
 
 let customCrosshairsDir: string | null;
 let customCrosshair: string | null;
@@ -76,11 +132,11 @@ function getSelectedCrosshairPath() {
     if (customCrosshair && customCrosshairsDir) {
         return path.join(customCrosshairsDir, customCrosshair);
     } else {
-		if (process.platform === 'linux') {
-			return path.join(CROSSHAIRS_DIR, '..', 'public', 'crosshairs', config.crosshair);
-		} else if (process.platform === 'win32') {
-			return path.join(CROSSHAIRS_DIR, '..', 'crosshairs', config.crosshair);
-		}
+        if (process.platform === 'linux') {
+            return path.join(CROSSHAIRS_DIR, '..', 'public', 'crosshairs', config.crosshair);
+        } else if (process.platform === 'win32') {
+            return path.join(CROSSHAIRS_DIR, '..', 'crosshairs', config.crosshair);
+        }
     }
 }
 
@@ -104,7 +160,6 @@ ipcMain.on('config', (event, newConfig: Config) => {
     config = newConfig;
     crosshair.size = +config.size;
     crosshair.opacity = +config.opacity;
-
     const selectedCrosshair = getSelectedCrosshairPath();
     crosshair.setImage(selectedCrosshair || '');
     crosshair.applyOpacity();
@@ -133,7 +188,6 @@ ipcMain.on('change-opacity', (event, opacity) => {
 ipcMain.on('change-crosshair', (event, name) => {
     config.crosshair = name;
     customCrosshair = null;
-
     const crosshairFilename = getSelectedCrosshairFilename();
     crosshair.window?.webContents.send('crosshair-loaded', crosshairFilename);
 });
@@ -156,10 +210,10 @@ ipcMain.on('hide-crosshair', () => {
     crosshair.hide();
 });
 
-ipcMain.on('open-folder-dialog', async event => {
+ipcMain.on('open-folder-dialog', async (event) => {
     const selectedFolder = await dialog.showOpenDialog({
         title: 'Select Directory',
-        properties: ['openDirectory']
+        properties: ['openDirectory'],
     });
     if (!selectedFolder.canceled) {
         event.reply('custom-crosshairs-directory', selectedFolder.filePaths[0]);
@@ -176,11 +230,11 @@ ipcMain.on('open-crosshair-directory', (event, directory) => {
     }
 });
 
-ipcMain.on('refresh-crosshairs', async event => {
+ipcMain.on('refresh-crosshairs', async (event) => {
     try {
         if (customCrosshairsDir) {
             const files = await fs.readdir(customCrosshairsDir);
-            const pngFiles = files.filter(file => path.extname(file) === '.png');
+            const pngFiles = files.filter((file) => path.extname(file) === '.png');
             event.reply('custom-crosshairs-response', pngFiles);
         } else {
             console.log('No directory selected');
@@ -191,7 +245,7 @@ ipcMain.on('refresh-crosshairs', async event => {
     }
 });
 
-ipcMain.on('about-request', async event => {
+ipcMain.on('about-request', async (event) => {
     const pkgPath = path.join(app.getAppPath(), 'package.json');
     try {
         const pkg = await fs.readFile(pkgPath, 'utf-8');
@@ -205,13 +259,14 @@ ipcMain.on('about-request', async event => {
 
 ipcMain.on('download-updates', async () => {
     try {
-        const url = 'https://api.github.com/repos/YSSF8/crosshair-y/releases/latest';
+        const url =
+            'https://api.github.com/repos/YSSF8/crosshair-y/releases/latest';
         const response = await axios.get(url);
         const data = await response.data;
         const assets = data.assets;
         const operatingSystem = `${platform()}-${arch()}`;
-        
-        const promises = assets.map((asset: any) => 
+
+        const promises = assets.map((asset: any) =>
             asset.browser_download_url.includes(operatingSystem)
         );
 
