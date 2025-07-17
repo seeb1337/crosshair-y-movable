@@ -11,6 +11,8 @@ const DEFAULT_CONFIG = {
 };
 let config = JSON.parse(localStorage.getItem('config')) || { ...DEFAULT_CONFIG };
 
+window.toggleCrosshairCheckbox = () => toggleCrosshair.toggle();
+
 ipcRenderer.send('built-in-crosshairs');
 ipcRenderer.send('onload-crosshair-directory', localStorage.getItem('crosshairs-directory') || null);
 ipcRenderer.send('change-custom-crosshair', localStorage.getItem('custom-crosshair') || null);
@@ -73,6 +75,10 @@ refreshDir.addEventListener('click', () => {
 });
 
 refreshDir.click();
+
+ipcRenderer.on('tray-toggle', () => {
+    window.toggleCrosshairCheckbox?.();
+});
 
 openDir.title = localStorage.getItem('crosshairs-directory') || 'No directory';
 if (localStorage.getItem('crosshairs-directory')) {

@@ -54,7 +54,11 @@ app.on('ready', () => {
         },
         {
             label: 'Toggle',
-            click: () => toggleCrosshair()
+            click: () => {
+                if (window && !window.isDestroyed()) {
+                    window.webContents.send('tray-toggle');
+                }
+            }
         },
         {
             label: 'Quit',
