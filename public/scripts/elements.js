@@ -480,3 +480,308 @@ class CustomCheck extends HTMLElement {
 }
 
 customElements.define('custom-check', CustomCheck);
+
+class CustomSelect extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+
+        const style = document.createElement('style');
+        style.textContent = `
+            :host {
+                --radius: 8px;
+                --bg: var(--primary-color, #181818);
+                --border: 1px solid #ccc;
+                --accent: var(--accent-primary, #0057b7);
+                --text: #fff;
+                --shadow: 0 4px 12px rgba(0,0,0,.15);
+                display: inline-block;
+                position: relative;
+                font-family: inherit;
+                font-size: 14px;
+                min-width: 160px;
+            }
+
+            .trigger {
+                width: 100%;
+                padding: 10px 12px;
+                border: var(--border);
+                border-radius: var(--radius);
+                background: var(--bg);
+                color: var(--text);
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+            .trigger:focus-visible {
+                outline: 2px solid var(--accent);
+                outline-offset: 2px;
+            }
+
+            .label {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .chevron {
+                width: 12px;
+                height: 12px;
+                fill: none;
+                stroke: currentColor;
+                stroke-width: 2;
+                transition: transform .25s;
+                flex-shrink: 0;
+            }
+            :host([open]) .chevron {
+                transform: rotate(180deg);
+            }
+
+            .dropdown {
+                position: fixed;
+                top: 0;
+                left: 0;
+                min-width: var(--dropdown-width, 160px);
+                background: var(--bg);
+                border: var(--border);
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                z-index: 9999;
+                max-height: 200px;
+                overflow-y: auto;
+                opacity: 0;
+                transform: translateY(-6px);
+                pointer-events: none;
+                transition: opacity .25s ease, transform .25s ease;
+            }
+            :host([open]) .dropdown {
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: auto;
+            }
+
+            .option {
+                padding: 8px 12px;
+                cursor: pointer;
+                user-select: none;
+            }
+            .option[selected] {
+                background: var(--accent);
+                color: #fff;
+            }
+            .option:hover:not([selected]) {
+                background: rgba(0,0,0,.05);
+            }
+        `;
+
+        this._trigger = document.createElement('button');
+        this._trigger.className = 'trigger';
+        this._trigger.setAttribute('type', 'button');
+        this._trigger.setAttribute('aria-haspopup', 'listbox');
+        this._trigger.setAttribute('aria-expanded', 'false');
+
+        this._label = document.createElement('span');
+        this._label.className = 'label';
+
+        this._chevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        this._chevron.classList.add('chevron');
+        this._chevron.setAttribute('viewBox', '0 0 24 24');
+        this._chevron.innerHTML = '<polyline points="6,9 12,15 18,9" />';
+
+        this._trigger.append(this._label, this._chevron);
+
+        this._dropdown = document.createElement('div');
+        this._dropdown.className = 'dropdown';
+        this._dropdown.setAttribute('role', 'listbox');
+
+        this.shadowRoot.append(style, this._trigger, this._dropdown);
+
+        this._options = [];
+        this._value = '';
+        this._open = false;
+
+        this._observer = null;
+        this._boundReposition = () => this._reposition();
+
+        this._trigger.addEventListener('click', () => this.toggle());
+        this._dropdown.addEventListener('click', (e) => {
+            const option = e.target.closest('.option');
+            if (option) {
+                this._select(option.dataset.value);
+                this.open = false;
+            }
+        });
+        this.addEventListener('keydown', this._onKeyDown.bind(this));
+    }
+
+    get value() {
+        return this._value;
+    }
+    set value(v) {
+        this._select(v, { silent: true });
+    }
+
+    get open() {
+        return this._open;
+    }
+    set open(flag) {
+        flag ? this._show() : this._hide();
+    }
+
+    toggle() {
+        this.open = !this.open;
+    }
+
+    _parseOptions() {
+        this._options = [...this.children].filter(n => n.tagName === 'OPTION');
+
+        const selectedOption =
+            this._options.find(o => o.hasAttribute('selected')) ||
+            this._options[0] ||
+            null;
+
+        this._value = selectedOption ? selectedOption.value : '';
+
+        this._dropdown.innerHTML = '';
+        this._options.forEach(opt => {
+            const div = document.createElement('div');
+            div.className = 'option';
+            div.textContent = opt.textContent;
+            div.dataset.value = opt.value;
+            if (opt.value === this._value) div.setAttribute('selected', '');
+            this._dropdown.appendChild(div);
+        });
+        this._updateLabel();
+    }
+
+    _updateLabel() {
+        const selected = this._options.find(o => o.value === this._value);
+        this._label.textContent = selected ? selected.textContent : '';
+    }
+
+    _select(value, { silent = false } = {}) {
+        if (value === this._value) return;
+        this._value = value;
+        this._updateLabel();
+        this._dropdown.querySelectorAll('.option').forEach(opt => {
+            opt.toggleAttribute('selected', opt.dataset.value === value);
+        });
+        if (!silent) {
+            this.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    }
+
+    _show() {
+        if (this._open) return;
+        this._open = true;
+        this.setAttribute('open', '');
+        this._trigger.setAttribute('aria-expanded', 'true');
+
+        this.style.setProperty('--dropdown-width', `${this.offsetWidth}px`);
+        this._reposition();
+
+        this._observer = new IntersectionObserver(this._boundReposition, {
+            root: null,
+            threshold: 1
+        });
+        this._observer.observe(this);
+        window.addEventListener('scroll', this._boundReposition, true);
+        window.addEventListener('resize', this._boundReposition);
+        document.addEventListener('click', this._onOutsideClick.bind(this), true);
+    }
+
+    _hide() {
+        if (!this._open) return;
+        this._open = false;
+        this.removeAttribute('open');
+        this._trigger.setAttribute('aria-expanded', 'false');
+
+        if (this._observer) {
+            this._observer.disconnect();
+            this._observer = null;
+        }
+        window.removeEventListener('scroll', this._boundReposition, true);
+        window.removeEventListener('resize', this._boundReposition);
+        document.removeEventListener('click', this._onOutsideClick, true);
+    }
+
+    _reposition() {
+        if (!this._open) return;
+        const rect = this.getBoundingClientRect();
+        this._dropdown.style.top = `${rect.bottom + window.scrollY}px`;
+        this._dropdown.style.left = `${rect.left + window.scrollX}px`;
+    }
+
+    _onOutsideClick(e) {
+        if (!e.composedPath().includes(this)) this._hide();
+    }
+
+    _onKeyDown(e) {
+        if (!this._open && ['ArrowDown', 'ArrowUp', ' '].includes(e.key)) {
+            e.preventDefault();
+            this.open = true;
+            return;
+        }
+        if (!this._open) return;
+
+        const opts = [...this._dropdown.querySelectorAll('.option')];
+        const currentIndex = opts.findIndex(o => o.hasAttribute('selected'));
+        let nextIndex = currentIndex;
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                nextIndex = (currentIndex + 1) % opts.length;
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                nextIndex = (currentIndex - 1 + opts.length) % opts.length;
+                break;
+            case 'Enter':
+            case ' ':
+                e.preventDefault();
+                this._select(opts[currentIndex].dataset.value);
+                this.open = false;
+                break;
+            case 'Escape':
+                e.preventDefault();
+                this.open = false;
+                break;
+        }
+        if (nextIndex !== currentIndex) {
+            opts.forEach(o => o.removeAttribute('selected'));
+            opts[nextIndex].setAttribute('selected', '');
+        }
+    }
+
+    /* ----------  Lifecycle  ---------- */
+    static get observedAttributes() {
+        return ['value'];
+    }
+
+    attributeChangedCallback(name, old, val) {
+        if (name === 'value' && val !== this._value) {
+            this._select(val, { silent: true });
+        }
+    }
+
+    connectedCallback() {
+        this._parseOptions();
+        this._upgradeProperty('value');
+        this._upgradeProperty('open');
+    }
+
+    _upgradeProperty(prop) {
+        if (this.hasOwnProperty(prop)) {
+            const value = this[prop];
+            delete this[prop];
+            this[prop] = value;
+        }
+    }
+
+    disconnectedCallback() {
+        this._hide();
+    }
+}
+
+customElements.define('custom-select', CustomSelect);
