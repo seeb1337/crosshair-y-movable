@@ -754,7 +754,6 @@ class CustomSelect extends HTMLElement {
         }
     }
 
-    /* ----------  Lifecycle  ---------- */
     static get observedAttributes() {
         return ['value'];
     }
