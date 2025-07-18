@@ -1,7 +1,7 @@
 {
   "name": "crosshair-y",
   "productName": "Crosshair Y",
-  "version": "2.1",
+  "version": "2.2",
   "main": "dist/index.js",
   "scripts": {
     "start": "electron .",
