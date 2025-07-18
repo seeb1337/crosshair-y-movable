@@ -277,6 +277,25 @@ body.body-settings .section {
   background-color: var(--tertiary-color);
 }
 
+.settings-btn {
+  position: relative;
+  width: 100px;
+  height: 40px;
+  border: none;
+  border-radius: 20px;
+  background: #0057b7;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 87, 183, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.settings-btn:active {
+  opacity: 0.7;
+}
+
 .icon {
   fill: var(--icon);
 }
