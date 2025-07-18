@@ -136,42 +136,65 @@ ipcMain.on('onload-crosshair-directory', (event, directory) => {
     }
 });
 
-let config: Config;
+const DEFAULT_CONFIG: Config = {
+    size: 40,
+    hue: 0,
+    rotation: 0,
+    opacity: 1,
+    crosshair: 'Simple.png'
+};
+
+let config: Config = { ...DEFAULT_CONFIG };
 
 function getSelectedCrosshairPath() {
+    const cfg = config ?? DEFAULT_CONFIG;
     if (customCrosshair && customCrosshairsDir) {
         return path.join(customCrosshairsDir, customCrosshair);
     } else {
         if (process.platform === 'linux') {
-            return path.join(CROSSHAIRS_DIR, '..', 'public', 'crosshairs', config.crosshair);
+            return path.join(CROSSHAIRS_DIR, '..', 'public', 'crosshairs', cfg.crosshair);
         } else if (process.platform === 'win32') {
-            return path.join(CROSSHAIRS_DIR, '..', 'crosshairs', config.crosshair);
+            return path.join(CROSSHAIRS_DIR, '..', 'crosshairs', cfg.crosshair);
         }
     }
 }
 
 function getSelectedCrosshairFilename() {
-    if (customCrosshair && customCrosshairsDir) {
-        return customCrosshair;
-    } else {
-        return config.crosshair;
-    }
+    const cfg = config ?? DEFAULT_CONFIG;
+    return (customCrosshair && customCrosshairsDir) ? customCrosshair : cfg.crosshair;
 }
 
 ipcMain.on('change-custom-crosshair', (event, name) => {
     customCrosshair = name;
-    if (customCrosshairsDir && customCrosshair) {
-        const selectedCrosshair = getSelectedCrosshairPath();
-        crosshair.setImage(selectedCrosshair || '');
-    }
+
+    const selectedCrosshair = getSelectedCrosshairPath();
+    crosshair.setImage(selectedCrosshair || '');
+
+    crosshair.size = +config.size;
+    crosshair.hue = +config.hue;
+    crosshair.rotation = +config.rotation;
+    crosshair.opacity = +config.opacity;
+
+    crosshair.applySize();
+    crosshair.applyHue();
+    crosshair.applyRotation();
+    crosshair.applyOpacity();
 });
 
 ipcMain.on('config', (event, newConfig: Config) => {
     config = newConfig;
-    crosshair.size = +config.size;
-    crosshair.opacity = +config.opacity;
+
     const selectedCrosshair = getSelectedCrosshairPath();
     crosshair.setImage(selectedCrosshair || '');
+
+    crosshair.size = +config.size;
+    crosshair.hue = +config.hue;
+    crosshair.rotation = +config.rotation;
+    crosshair.opacity = +config.opacity;
+
+    crosshair.applySize();
+    crosshair.applyHue();
+    crosshair.applyRotation();
     crosshair.applyOpacity();
 });
 

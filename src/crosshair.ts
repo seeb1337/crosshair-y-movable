@@ -51,6 +51,12 @@ class CrosshairOverlay {
 
             this.window.webContents.on('did-finish-load', () => {
                 this.window?.webContents.send('load-crosshair', imagePath);
+
+                setTimeout(() => {
+                    this.window?.webContents.send('load-hue', this.hue);
+                    this.window?.webContents.send('load-rotation', this.rotation);
+                    this.window?.webContents.send('load-opacity', this.opacity);
+                }, 50);
             });
 
             this.window.on('closed', () => {
@@ -93,9 +99,14 @@ class CrosshairOverlay {
     }
 
     setImage(imagePath: string) {
-        if (this.window) {
-            this.window.webContents.send('load-crosshair', imagePath);
-        }
+        if (!this.window) return;
+        this.window.webContents.send('load-crosshair', imagePath);
+
+        setTimeout(() => {
+            this.window?.webContents.send('load-hue', this.hue);
+            this.window?.webContents.send('load-rotation', this.rotation);
+            this.window?.webContents.send('load-opacity', this.opacity);
+        }, 50);
     }
 
     close() {
