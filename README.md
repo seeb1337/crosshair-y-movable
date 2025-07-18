@@ -19,8 +19,8 @@ Crosshair Y is a free and open-source alternative to Crosshair X, designed to pr
 
 - **Built-in Crosshairs**: Choose from a variety of pre-installed crosshair designs.
 - **Custom Crosshairs**: Easily add your own custom crosshair images.
-- **Adjustable Size**: Customize the size of your crosshair to your preference.
-- **Hue Adjustment**: Modify the color hue of your crosshair for better visibility.
+- **Adjustable Size, Hue, Rotation & Opacity**: Dial-in the perfect look and visibility. 
+- **Presets**: Save, load, and delete crosshair configurations on the fly from the Settings panel.
 - **Cross-Platform**: Available for Windows and Linux.
 - **Lightweight & Efficient**: Minimal system resource usage ensures smooth performance.
 - **User-Friendly Interface**: Intuitive UI for easy configuration and management.
@@ -86,8 +86,9 @@ The built applications will be located in the `build/` directory.
    - **Hue**: Modify the hue slider to change the crosshair color.
    - **Rotation**: Adjust the rotation slider to rotate the crosshair.
    - **Opacity**: Adjust the opacity slider to change the crosshair visibility level.
-4. **Toggling Visibility**: Use the toggle switch to show or hide the crosshair overlay.
-5. **Settings**: Access the settings window to reset configurations or manage crosshair directories.
+4. **Presets**: Use the “Presets” pane to save your current setup, load a previously saved one, or delete any you no longer need.
+5. **Toggling Visibility**: Use the toggle switch to show or hide the crosshair overlay.
+6. **Settings**: Access the settings window to reset configurations or manage crosshair directories.
 
 ## Configuration
 
