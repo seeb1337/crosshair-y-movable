@@ -277,6 +277,22 @@ body.body-settings .section {
   background-color: var(--tertiary-color);
 }
 
+.modal-input {
+  width: 100%;
+  padding: calc(var(--default-px) / 2);
+  border: 1px solid var(--line-color);
+  border-radius: var(--default-px);
+  background-color: var(--secondary-color);
+  color: var(--icon);
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 200ms;
+}
+.modal-input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+}
+
 .settings-btn {
   position: relative;
   width: 100px;
