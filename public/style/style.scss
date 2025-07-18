@@ -335,6 +335,12 @@ body {
     &:active {
         opacity: .7;
     }
+
+    &.settings-btn-danger {
+        background: #ff3b30;
+        box-shadow: 0 2px 4px rgba(255, 59, 48, 0.2);
+        color: #fff;
+    }
 }
 
 .icon {
