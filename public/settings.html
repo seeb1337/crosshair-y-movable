@@ -54,7 +54,7 @@
                         <div class="sub-label">Load a saved preset</div>
                     </div>
                     <div class="value">
-                        <custom-select id="preset-select">
+                        <custom-select id="load-preset">
                             <option value="default" selected>Default</option>
                         </custom-select>
                     </div>
@@ -65,7 +65,25 @@
                         <div class="sub-label">Save to a new preset</div>
                     </div>
                     <div class="value">
-                        <button class="settings-btn">Save</button>
+                        <button class="settings-btn" id="save-preset">Save</button>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="label">
+                        <div>Delete preset</div>
+                        <div class="sub-label">Delete the selected preset</div>
+                    </div>
+                    <div class="value">
+                        <button class="settings-btn settings-btn-danger" id="delete-preset">Delete</button>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="label">
+                        <div>Delete all preset</div>
+                        <div class="sub-label">Deletes all of the saved presets</div>
+                    </div>
+                    <div class="value">
+                        <button class="settings-btn settings-btn-danger" id="delete-all-preset">Delete</button>
                     </div>
                 </div>
             </div>

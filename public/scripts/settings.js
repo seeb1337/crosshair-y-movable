@@ -33,6 +33,10 @@ settings.addEventListener('click', () => {
         const hueRange = frameBody.querySelector('#hue-range');
         const rotateRange = frameBody.querySelector('#rotate-range');
         const opacityRange = frameBody.querySelector('#opacity-range');
+        const loadPresetSelect = frameBody.querySelector('#load-preset');
+        const savePresetButton = frameBody.querySelector('#save-preset');
+        const deletePresetBtn = frameBody.querySelector('#delete-preset');
+        const deleteAllPresetsBtn = frameBody.querySelector('#delete-all-preset');
         const setDirectory = frameBody.querySelector('#set-directory');
         const setDirectorySubText = setDirectory.querySelector('.sub-label');
         const removeDir = frameBody.querySelector('#remove-directory');
@@ -69,7 +73,7 @@ settings.addEventListener('click', () => {
         if (resetButton) {
             resetButton.addEventListener('click', () => {
                 localStorage.removeItem('config');
-                config = { ...(typeof DEFAULT_CONFIG !== 'undefined' ? DEFAULT_CONFIG : { size: 40, hue: 0, rotation: 0, opacity: 1, crosshair: '' /* Add default crosshair */}) };
+                config = { ...(typeof DEFAULT_CONFIG !== 'undefined' ? DEFAULT_CONFIG : { size: 40, hue: 0, rotation: 0, opacity: 1, crosshair: '' }) };
 
                 sizeRange.value = config.size;
                 hueRange.value = config.hue;
@@ -109,7 +113,7 @@ settings.addEventListener('click', () => {
                 if (localStorage.getItem('auto-updates') === 'true') {
                     localStorage.removeItem('auto-updates');
                 }
-                 autoUpdater.checked = false;
+                autoUpdater.checked = false;
 
                 refreshOverlay();
             });
@@ -164,6 +168,187 @@ settings.addEventListener('click', () => {
             localStorage.setItem('config', JSON.stringify(config));
             ipcRenderer.send('change-opacity', opacityRange.value);
             opacityRange.title = parseFloat(opacityRange.value.toFixed(1));
+        });
+
+        function rebuildPresetList() {
+            loadPresetSelect.innerHTML = '<option value="default">Default</option>';
+
+            const presets = JSON.parse(localStorage.getItem('crosshair-presets') || '{}');
+            Object.keys(presets).forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                opt.textContent = name;
+                loadPresetSelect.appendChild(opt);
+            });
+
+            loadPresetSelect._parseOptions?.();
+        }
+
+        rebuildPresetList();
+
+        loadPresetSelect.addEventListener('change', () => {
+            const selectedPreset = loadPresetSelect.value;
+            if (!selectedPreset) return;
+
+            let presetObj;
+            if (selectedPreset === 'default') {
+                presetObj = { ...DEFAULT_CONFIG };
+            } else {
+                const presets = JSON.parse(localStorage.getItem('crosshair-presets') || '{}');
+                presetObj = presets[selectedPreset];
+                if (!presetObj) return;
+            }
+
+            config = { ...config, ...presetObj };
+            localStorage.setItem('config', JSON.stringify(config));
+
+            sizeRange.value = config.size;
+            hueRange.value = config.hue;
+            rotateRange.value = config.rotation;
+            opacityRange.value = config.opacity;
+
+            sizeRange.title = sizeRange.value;
+            hueRange.title = hueRange.value;
+            rotateRange.title = rotateRange.value;
+            opacityRange.title = parseFloat(opacityRange.value).toFixed(1);
+
+            ipcRenderer.send('config', config);
+            ipcRenderer.send('change-size', config.size);
+            ipcRenderer.send('change-hue', config.hue);
+            ipcRenderer.send('change-rotation', config.rotation);
+            ipcRenderer.send('change-opacity', config.opacity);
+
+            if (config.crosshair) {
+                if (config.crosshair.startsWith(localStorage.getItem('crosshairs-directory') || '')) {
+                    ipcRenderer.send('change-custom-crosshair', config.crosshair);
+                    localStorage.setItem('custom-crosshair', config.crosshair);
+                } else {
+                    ipcRenderer.send('change-crosshair', config.crosshair);
+                    localStorage.removeItem('custom-crosshair');
+                }
+            }
+
+            refreshOverlay();
+        });
+
+        savePresetButton.addEventListener('click', () => {
+            const modal = new Modal([
+                {
+                    element: 'div',
+                    extraClass: 'modal-wrapper',
+                    children: [
+                        { element: 'div', text: 'Enter a name for the preset' },
+                        {
+                            element: 'input',
+                            extraClass: 'modal-input',
+                            attributes: { placeholder: 'My awesome crosshair' }
+                        },
+                        {
+                            element: 'div',
+                            extraClass: 'modal-wrapper-buttons',
+                            children: [
+                                {
+                                    element: 'button',
+                                    text: 'Save',
+                                    event: 'click',
+                                    eventAction: (e) => {
+                                        const input = e.target.closest('.modal-foreground')
+                                            .querySelector('.modal-input');
+                                        const name = input.value.trim();
+                                        if (!name) return;
+
+                                        const presets = JSON.parse(localStorage.getItem('crosshair-presets') || '{}');
+                                        presets[name] = { ...config };
+                                        localStorage.setItem('crosshair-presets', JSON.stringify(presets));
+
+                                        rebuildPresetList();
+
+                                        const opt = document.createElement('option');
+                                        opt.value = name;
+                                        opt.textContent = name;
+                                        loadPresetSelect.appendChild(opt);
+
+                                        modal.remove();
+                                    }
+                                },
+                                {
+                                    element: 'button',
+                                    text: 'Cancel',
+                                    event: 'click',
+                                    eventAction: () => modal.remove()
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]);
+
+            setTimeout(() => {
+                modal.element.querySelector('.modal-input')?.focus();
+            }, 50);
+        });
+
+        deletePresetBtn?.addEventListener('click', () => {
+            const selected = loadPresetSelect.value;
+            if (selected === 'default') return;
+
+            new Modal([
+                {
+                    element: 'div',
+                    extraClass: 'modal-wrapper',
+                    children: [
+                        { element: 'div', text: `Delete “${selected}”?` },
+                        {
+                            element: 'div',
+                            extraClass: 'modal-wrapper-buttons',
+                            children: [
+                                {
+                                    element: 'button',
+                                    text: 'Delete',
+                                    event: 'click',
+                                    eventAction: (e) => {
+                                        const presets = JSON.parse(localStorage.getItem('crosshair-presets') || '{}');
+                                        delete presets[selected];
+                                        localStorage.setItem('crosshair-presets', JSON.stringify(presets));
+                                        rebuildPresetList();
+                                        e.target.closest('.modal-background').remove();
+                                    }
+                                },
+                                { element: 'button', text: 'Cancel', event: 'click', eventAction: (e) => e.target.closest('.modal-background').remove() }
+                            ]
+                        }
+                    ]
+                }
+            ]);
+        });
+
+        deleteAllPresetsBtn?.addEventListener('click', () => {
+            new Modal([
+                {
+                    element: 'div',
+                    extraClass: 'modal-wrapper',
+                    children: [
+                        { element: 'div', text: 'Delete ALL saved presets?' },
+                        {
+                            element: 'div',
+                            extraClass: 'modal-wrapper-buttons',
+                            children: [
+                                {
+                                    element: 'button',
+                                    text: 'Delete All',
+                                    event: 'click',
+                                    eventAction: (e) => {
+                                        localStorage.removeItem('crosshair-presets');
+                                        rebuildPresetList();
+                                        e.target.closest('.modal-background').remove();
+                                    }
+                                },
+                                { element: 'button', text: 'Cancel', event: 'click', eventAction: (e) => e.target.closest('.modal-background').remove() }
+                            ]
+                        }
+                    ]
+                }
+            ]);
         });
 
         const crosshairsDirectory = localStorage.getItem('crosshairs-directory') || '';
