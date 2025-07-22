@@ -209,6 +209,63 @@ body {
     }
 }
 
+.navigation-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(var(--default-px) / 2);
+    background-color: var(--primary-color);
+    position: fixed;
+    width: calc(100% - var(--default-px) * 4 - 2px);
+    border: 1px solid var(--line-color);
+    border-radius: 999px;
+    margin-top: -8px;
+    box-shadow: 0 0 4px 2px rgba(0, 0, 0, 0.1);
+    z-index: 10000;
+
+    .navigation-tabs {
+        display: flex;
+        margin-right: calc(var(--default-px) / 2);
+
+        .navigation-tab {
+            border-radius: 999px;
+            padding: var(--default-px) calc(var(--default-px) * 2);
+            transition: 200ms;
+            transition-property: background, opacity;
+
+            &:hover {
+                background-color: var(--accent-primary);
+            }
+
+            &:active {
+                opacity: 0.7;
+            }
+        }
+    }
+
+    .navigation-input {
+        flex: 1;
+        position: relative;
+
+        input {
+            width: 100%;
+            padding: var(--default-px);
+            border: 1px solid var(--line-color);
+            border-radius: 999px;
+            background-color: var(--secondary-color);
+            color: var(--icon);
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: border-color 200ms;
+
+            &:focus {
+                outline: none;
+                border-color: var(--accent-primary);
+            }
+        }
+    }
+}
+
 .group-title {
     margin-left: calc(var(--default-px) * 2);
     font-size: calc(var(--default-px) * 1.5);
