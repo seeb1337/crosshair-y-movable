@@ -71,10 +71,12 @@ body.body-settings .section {
 }
 
 .container {
-  transition: translate 200ms cubic-bezier(0.52, 0.87, 0.45, 0.93);
+  transition: 200ms ease;
+  transition-property: scale, opacity;
 }
 .container.full-animation {
-  translate: 0 -3em;
+  opacity: 0;
+  scale: 0.8;
 }
 
 .section {
@@ -174,11 +176,11 @@ body.body-settings .section {
   translate: 0;
   opacity: 1;
   z-index: 1;
-  transition: 200ms cubic-bezier(0.52, 0.87, 0.45, 0.93);
-  transition-property: translate, opacity;
+  transition: 200ms ease;
+  transition-property: scale, opacity;
 }
 .full-frame.full-animation {
-  translate: 0 3em;
+  scale: 1.5;
   opacity: 0;
 }
 
