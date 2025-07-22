@@ -267,7 +267,7 @@ ipcMain.on('refresh-crosshairs', async (event) => {
     try {
         if (customCrosshairsDir) {
             const files = await fs.readdir(customCrosshairsDir);
-            const pngFiles = files.filter((file) => path.extname(file) === '.png');
+            const pngFiles = files.filter((file) => path.extname(file) === '.png' || path.extname(file) === '.svg');
             event.reply('custom-crosshairs-response', pngFiles);
         } else {
             console.log('No directory selected');
