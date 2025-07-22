@@ -41,7 +41,7 @@ settings.addEventListener('click', () => {
         const setDirectorySubText = setDirectory.querySelector('.sub-label');
         const removeDir = frameBody.querySelector('#remove-directory');
         const themeToggle = frameBody.querySelector('#theme-toggle');
-        const reducedMotionToggle = frameBody.querySelector('#reduced-motion-toggle');
+        const reducedMotionSelect = frameBody.querySelector('#reduced-motion-select');
         const about = frameBody.querySelector('#about');
         const checkForUpdates = frameBody.querySelector('#check-for-updates');
         const autoUpdater = frameBody.querySelector('#auto-updates-toggle');
@@ -54,12 +54,8 @@ settings.addEventListener('click', () => {
             themeToggle.checked = true;
         }
 
-        const prefersReducedMotion = localStorage.getItem('reduced-motion') === 'true';
-        reducedMotionToggle.checked = prefersReducedMotion;
-        if (prefersReducedMotion) {
-            htmlElement.classList.add('reduced-motion');
-            document.documentElement.classList.add('reduced-motion');
-        }
+        applyReducedMotion(reducedMotionSelect.value);
+        reducedMotionSelect.value = localStorage.getItem('reduced-motion') || 'system';
 
         autoUpdater.checked = localStorage.getItem('auto-updates') === 'true';
 
@@ -407,16 +403,10 @@ settings.addEventListener('click', () => {
             }
         });
 
-        reducedMotionToggle.addEventListener('change', () => {
-            if (reducedMotionToggle.checked) {
-                localStorage.setItem('reduced-motion', 'true');
-                htmlElement.classList.add('reduced-motion');
-                document.documentElement.classList.add('reduced-motion');
-            } else {
-                localStorage.removeItem('reduced-motion');
-                htmlElement.classList.remove('reduced-motion');
-                document.documentElement.classList.remove('reduced-motion');
-            }
+        reducedMotionSelect.addEventListener('change', () => {
+            const val = reducedMotionSelect.value;
+            localStorage.setItem('reduced-motion', val);
+            applyReducedMotion(val);
         });
 
         about.addEventListener('click', () => {

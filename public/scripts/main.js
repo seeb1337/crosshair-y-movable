@@ -140,6 +140,16 @@ openDir.addEventListener('click', () => {
     }
 });
 
+function applyReducedMotion(val) {
+    if (val === 'on' || (val === 'system' && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+        document.documentElement.classList.add('reduced-motion');
+    } else {
+        document.documentElement.classList.remove('reduced-motion');
+    }
+}
+
+applyReducedMotion(localStorage.getItem('reduced-motion') || 'system');
+
 function refreshOverlay() {
     ipcRenderer.send('destroy-crosshair');
     ipcRenderer.send('change-hue', config.hue);
