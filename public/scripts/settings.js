@@ -23,6 +23,38 @@ settings.addEventListener('click', () => {
         const frameBody = frameDoc.body;
         const htmlElement = frameBody.parentElement;
 
+        let navigationSections = {};
+
+        frameBody.querySelectorAll('.group-title').forEach(title => {
+            navigationSections[title.id] = title.textContent;
+        });
+
+        const navigationWrapper = frameBody.querySelector('.navigation-wrapper');
+        const navigationTabs = frameBody.querySelector('.navigation-tabs');
+        const crosshairGroupTitle = frameBody.querySelector('.group-title#crosshair');
+
+        const NAV_HEIGHT = navigationWrapper.offsetHeight + 8;
+
+        crosshairGroupTitle.style.marginTop = `${NAV_HEIGHT}px`;
+
+        Object.keys(navigationSections).forEach(section => {
+            const tab = document.createElement('div');
+            tab.classList.add('navigation-tab');
+            tab.textContent = navigationSections[section];
+
+            tab.addEventListener('click', () => {
+                const targetSection = frameBody.querySelector(`#${section}`);
+                if (!targetSection) return;
+
+                const scrollTop = targetSection.offsetTop - (NAV_HEIGHT * 2.5);
+                targetSection.parentElement.scrollTo({
+                    top: scrollTop,
+                    behavior: 'smooth'
+                });
+            });
+            navigationTabs.appendChild(tab);
+        });
+
         if (localStorage.getItem('light-theme')) {
             htmlElement.classList.add('light-theme');
         }
