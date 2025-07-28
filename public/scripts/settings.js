@@ -31,7 +31,67 @@ settings.addEventListener('click', () => {
 
         const navigationWrapper = frameBody.querySelector('.navigation-wrapper');
         const navigationTabs = frameBody.querySelector('.navigation-tabs');
+        const searchInput = frameBody.querySelector('#search-input');
+        const itemsFound = frameBody.querySelector('.items-found');
+        const navButtons = frameBody.querySelector('.navigation-buttons');
         const crosshairGroupTitle = frameBody.querySelector('.group-title#crosshair');
+
+        let searchHits = [];
+        let currentIndex = -1;
+
+        const btnPrev = navButtons.children[0];
+        const btnNext = navButtons.children[1];
+
+        const scrollToHit = idx => {
+            if (!searchHits.length) return;
+            currentIndex = ((idx % searchHits.length) + searchHits.length) % searchHits.length;
+
+            searchHits.forEach((it, i) => it.classList.toggle('item-found', i === currentIndex));
+
+            searchHits[currentIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            itemsFound.textContent = `${currentIndex + 1}/${searchHits.length}`;
+        };
+
+        const handleSearch = debounce(() => {
+            const query = searchInput.value.trim().toLowerCase();
+            const allItems = [...frameBody.querySelectorAll('.item')];
+
+            allItems.forEach(it => it.classList.remove('item-found'));
+            searchHits = [];
+            currentIndex = -1;
+
+            if (!query) {
+                itemsFound.textContent = '0/0';
+                navButtons.classList.remove('items-are-found');
+                itemsFound.classList.remove('items-are-found');
+                return;
+            }
+
+            searchHits = allItems.filter(it => it.textContent.toLowerCase().includes(query));
+            itemsFound.textContent = `0/${searchHits.length}`;
+            navButtons.classList.toggle('items-are-found', searchHits.length > 0);
+            itemsFound.classList.toggle('items-are-found', searchHits.length > 0);
+
+            if (searchHits.length) {
+                scrollToHit(0);
+            }
+        }, 200);
+
+        searchInput.addEventListener('input', handleSearch);
+
+        btnPrev.addEventListener('click', () => searchHits.length && scrollToHit(currentIndex - 1));
+        btnNext.addEventListener('click', () => searchHits.length && scrollToHit(currentIndex + 1));
+
+        searchInput.addEventListener('keydown', e => {
+            if (!searchHits.length) return;
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                scrollToHit(currentIndex + 1);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                scrollToHit(currentIndex - 1);
+            }
+        });
 
         const NAV_HEIGHT = navigationWrapper.offsetHeight + 8;
 
