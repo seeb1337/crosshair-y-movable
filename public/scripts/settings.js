@@ -146,8 +146,8 @@ settings.addEventListener('click', () => {
             themeToggle.checked = true;
         }
 
-        applyReducedMotion(reducedMotionSelect.value);
         reducedMotionSelect.value = localStorage.getItem('reduced-motion') || 'system';
+        applyReducedMotion(reducedMotionSelect.value);
 
         autoUpdater.checked = localStorage.getItem('auto-updates') === 'true';
 
@@ -191,12 +191,9 @@ settings.addEventListener('click', () => {
                 }
                 themeToggle.checked = true;
 
-                if (localStorage.getItem('reduced-motion') === 'true') {
-                    document.documentElement.classList.remove('reduced-motion');
-                    htmlElement.classList.remove('reduced-motion');
-                    localStorage.removeItem('reduced-motion');
-                }
-                reducedMotionToggle.checked = false;
+                localStorage.removeItem('reduced-motion');
+                reducedMotionSelect.value = 'system';
+                applyReducedMotion('system');
 
                 if (localStorage.getItem('auto-updates') === 'true') {
                     localStorage.removeItem('auto-updates');
