@@ -23,6 +23,8 @@ const container = document.querySelector('.container');
 const builtInSection = document.getElementById('built-in');
 const customSection = document.getElementById('custom');
 const toggleCrosshair = document.getElementById('toggle-crosshair');
+const searchCrosshairs = document.querySelector('.search-crosshairs');
+const searchCrosshairsInput = document.getElementById('search-crosshairs-input');
 const sortSelect = document.getElementById('sort-select');
 const refreshDir = document.querySelector('.refresh-dir');
 const openDir = document.querySelector('.open-dir');
@@ -90,14 +92,25 @@ if (localStorage.getItem('auto-updates')) {
     updatesCheck(true);
 }
 
+searchCrosshairs.addEventListener('click', () => {
+    searchCrosshairsInput.focus();
+});
+
+searchCrosshairsInput.addEventListener('input', updateAndRender);
+
 let fileFormats = [];
 let originalNames = [];
 let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 
 function updateAndRender() {
+    const searchTerm = searchCrosshairsInput.value.toLowerCase();
     const sortOrder = sortSelect.value;
 
-    const sortedList = [...originalNames].sort((a, b) => {
+    const filteredList = originalNames.filter(fileName =>
+        fileName.split('.').slice(0, -1).join('.').toLowerCase().includes(searchTerm)
+    );
+
+    const sortedList = [...filteredList].sort((a, b) => {
         const nameA = a.split('.').slice(0, -1).join('.').toLowerCase();
         const nameB = b.split('.').slice(0, -1).join('.').toLowerCase();
         return sortOrder === 'az'

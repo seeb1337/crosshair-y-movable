@@ -95,6 +95,43 @@ body {
     padding: calc(var(--default-px) * 2) var(--default-px);
 }
 
+.search-crosshairs {
+    display: flex;
+    align-items: stretch;
+    background-color: var(--secondary-color);
+    border: 1px solid var(--line-color);
+    border-radius: var(--default-px);
+    padding: calc(var(--default-px) / 2);
+    margin-right: var(--default-px);
+    overflow: hidden;
+    outline: none;
+    cursor: text;
+    transition: 200ms;
+    transition-property: border-color, gap;
+
+    &:has(input:focus) {
+        gap: calc(var(--default-px) / 2);
+        border-color: var(--accent-primary);
+    }
+
+    svg {
+        pointer-events: none;
+        scale: .7;
+    }
+
+    input {
+        all: unset;
+        color: var(--icon);
+        font-size: 14px;
+        width: 0;
+        transition: width 300ms ease;
+
+        &:focus {
+            width: 200px;
+        }
+    }
+}
+
 .crosshair {
     flex: 1;
     display: flex;
