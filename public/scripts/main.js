@@ -92,6 +92,7 @@ if (localStorage.getItem('auto-updates')) {
 
 let fileFormats = [];
 let originalNames = [];
+let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 
 ipcRenderer.send('onload-crosshair-directory', localStorage.getItem('crosshairs-directory') || null);
 ipcRenderer.on('custom-crosshairs-response', (_event, crosshairs) => {
@@ -111,16 +112,88 @@ ipcRenderer.on('custom-crosshairs-response', (_event, crosshairs) => {
 
 function renderCustomSection(list) {
     const dir = localStorage.getItem('crosshairs-directory');
-    customSection.innerHTML = list
-        .map(fileName => {
-            const nameOnly = fileName.split('.').slice(0, -1).join('.');
-            return `
-                <div class="crosshair">
-                  <img src="${dir}/${fileName}" height="40" width="40" draggable="false" alt="">
-                  <div>${nameOnly}</div>
-                </div>`;
-            })
-            .join('');
+    if (!dir) return;
+
+    const ordered = [
+        ...favorites.filter(f => list.includes(f)),
+        ...list.filter(f => !favorites.includes(f))
+    ];
+
+    customSection.innerHTML = '';
+    ordered.forEach(fileName => {
+        const nameOnly = fileName.split('.').slice(0, -1).join('.');
+        const div = document.createElement('div');
+        div.className = 'crosshair';
+        div.dataset.file = fileName;
+        div.innerHTML = `
+            <img src="${dir}/${fileName}" height="40" width="40" draggable="false" alt="">
+            <div>${nameOnly}</div>`;
+        customSection.appendChild(div);
+
+        const isFavorite = favorites.includes(fileName);
+
+        const favoriteLabel = isFavorite ? 'Remove from favorites' : 'Add to favorites';
+
+        new ContextMenu(div, {
+            [favoriteLabel]: item => {
+                const wasFavorite = favorites.includes(fileName);
+
+                if (wasFavorite) {
+                    const idx = favorites.indexOf(fileName);
+                    if (idx !== -1) {
+                        favorites.splice(idx, 1);
+                        localStorage.setItem('favorites', JSON.stringify(favorites));
+                        renderCustomSection(originalNames);
+                        item.setText('Add to favorites');
+                    }
+                } else {
+                    favorites.push(fileName);
+                    localStorage.setItem('favorites', JSON.stringify(favorites));
+                    renderCustomSection(originalNames);
+                    item.setText('Remove from favorites');
+                }
+            },
+            'Reveal in folder': () => ipcRenderer.send('reveal-crosshair', fileName),
+            'Delete': () => {
+                new Modal([
+                    {
+                        element: 'div',
+                        extraClass: 'modal-wrapper',
+                        children: [
+                            { element: 'div', text: `Delete "${fileName.split('/').pop()}"?` },
+                            { element: 'div', text: 'This action cannot be undone.' },
+                            {
+                                element: 'div',
+                                extraClass: 'modal-wrapper-buttons',
+                                children: [
+                                    {
+                                        element: 'button',
+                                        text: 'Delete',
+                                        event: 'click',
+                                        eventAction: (e) => {
+                                            const idx = favorites.indexOf(fileName);
+                                            if (idx !== -1) {
+                                                favorites.splice(idx, 1);
+                                                localStorage.setItem('favorites', JSON.stringify(favorites));
+                                            }
+
+                                            ipcRenderer.send('delete-crosshair', fileName);
+
+                                            e.target.closest('.modal-background').remove();
+                                        }
+                                    },
+                                    { element: 'button', text: 'Cancel', event: 'click', eventAction: (e) => e.target.closest('.modal-background').remove() }
+                                ]
+                            }
+                        ]
+                    }
+                ]);
+                document.body.lastElementChild.__modal = document.body.lastElementChild;
+            }
+        });
+    });
+
+    attachClickHandlers();
 }
 
 function attachClickHandlers() {

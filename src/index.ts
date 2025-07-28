@@ -319,6 +319,49 @@ ipcMain.on('import-presets', async (event) => {
     }
 });
 
+ipcMain.on('reveal-crosshair', (_e, fileName: string) => {
+    const dir = customCrosshairsDir;
+    if (!dir) return;
+
+    const full = path.join(dir, fileName);
+    if (process.platform === 'linux') {
+        const fileUri = `file://${encodeURI(full)}`;
+
+        const dbusCommand = `dbus-send --session --dest=org.freedesktop.FileManager1 --type=method_call ` +
+            `/org/freedesktop/FileManager1 org.freedesktop.FileManager1.ShowItems ` +
+            `array:string:"${fileUri}" string:""`;
+
+        childProcess.exec(dbusCommand, (error, stdout, stderr) => {
+            if (error) {
+                console.warn(`D-Bus command failed to reveal file: ${error.message}. ` +
+                    `Falling back to opening the directory with xdg-open.`);
+                childProcess.exec(`xdg-open "${dir}"`, (err) => {
+                    if (err) {
+                        console.error(`Failed to open directory with xdg-open as fallback: ${err.message}`);
+                    }
+                });
+            } else if (stderr) {
+                console.warn(`D-Bus command had stderr output: ${stderr}`);
+            }
+        });
+    } else if (process.platform === 'win32') {
+        childProcess.exec(`explorer /select,"${full}"`);
+    }
+});
+
+ipcMain.on('delete-crosshair', async (_e, fileName: string) => {
+    const dir = customCrosshairsDir;
+    if (!dir) return;
+
+    const full = path.join(dir, fileName);
+    try {
+        await fs.unlink(full);
+        window.webContents.send('refresh-crosshairs');
+    } catch (err) {
+        console.error(err);
+    }
+});
+
 ipcMain.on('about-request', async (event) => {
     const pkgPath = path.join(app.getAppPath(), 'package.json');
     try {
