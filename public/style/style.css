@@ -11,6 +11,7 @@
   --icon: #f0f0f0;
   --primary-opposite: #e0e0e0;
   --accent-primary: #0057b7;
+  --accent-primary-dark: #05203f;
   --accent-secondary: #ff7eb6;
   --hover-state: rgba(106, 140, 255, 0.1);
 }
@@ -217,25 +218,77 @@ body.body-settings .section {
 .navigation-wrapper .navigation-input {
   flex: 1;
   position: relative;
-}
-.navigation-wrapper .navigation-input input {
   width: 100%;
-  padding: var(--default-px);
   border: 1px solid var(--line-color);
   border-radius: 999px;
   background-color: var(--secondary-color);
   color: var(--icon);
   font-size: 14px;
   box-sizing: border-box;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
   transition: border-color 200ms;
 }
-.navigation-wrapper .navigation-input input:focus {
-  outline: none;
-  border-color: var(--accent-primary);
+.navigation-wrapper .navigation-input .items-found {
+  border-right: 1px solid var(--line-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--default-px);
+}
+.navigation-wrapper .navigation-input .items-found:not(.items-are-found) {
+  min-width: 0;
+  width: 0;
+  padding: 0;
+  border: none;
+  overflow: hidden;
+}
+.navigation-wrapper .navigation-input #search-input {
+  all: unset;
+  flex: 1;
+  padding: 0 var(--default-px);
+}
+.navigation-wrapper .navigation-input .navigation-buttons {
+  border-left: 1px solid var(--line-color);
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--default-px);
+  flex-basis: 0;
+  transition: flex-basis 200ms;
+}
+.navigation-wrapper .navigation-input .navigation-buttons .nav-button {
+  flex: 1;
+  border-radius: 50%;
+  width: 16px;
+  height: 18px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: 200ms;
+  transition-property: background, opacity;
+}
+.navigation-wrapper .navigation-input .navigation-buttons .nav-button:hover {
+  background-color: var(--accent-primary);
+}
+.navigation-wrapper .navigation-input .navigation-buttons .nav-button:active {
+  opacity: 0.7;
+}
+.navigation-wrapper .navigation-input .navigation-buttons .nav-button svg {
+  scale: 0.8;
+}
+.navigation-wrapper .navigation-input .navigation-buttons:not(.items-are-found) {
+  min-width: 0;
+  width: 0;
+  padding: 0;
+  border: none;
+  overflow: hidden;
 }
 
 .group-title {
   margin-left: calc(var(--default-px) * 2);
+  margin-bottom: 0;
   font-size: calc(var(--default-px) * 1.5);
   font-weight: bold;
   color: var(--accent-primary);
@@ -284,6 +337,9 @@ body.body-settings .section {
 }
 .group .item.button-item:active .label {
   scale: 0.9;
+}
+.group .item.item-found {
+  background-color: var(--accent-primary-dark);
 }
 
 .modal-background {
