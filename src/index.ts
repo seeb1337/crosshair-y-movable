@@ -278,6 +278,47 @@ ipcMain.on('refresh-crosshairs', async (event) => {
     }
 });
 
+ipcMain.on('export-presets', async (event, presets) => {
+    const result = await dialog.showSaveDialog({
+        title: 'Export Presets',
+        defaultPath: 'presets.json',
+        filters: [{ name: 'JSON Files', extensions: ['json'] }],
+    });
+
+    if (!result.canceled && result.filePath) {
+        try {
+            await fs.writeFile(result.filePath, JSON.stringify(presets, null, 2));
+            event.reply('export-presets-success', result.filePath);
+        } catch (err) {
+            console.error('Failed to write presets file:', err);
+            event.reply('export-presets-fail', (err as Error).message);
+        }
+    } else {
+        console.log('Export canceled');
+    }
+});
+
+ipcMain.on('import-presets', async (event) => {
+    const result = await dialog.showOpenDialog({
+        title: 'Import Presets',
+        properties: ['openFile'],
+        filters: [{ name: 'JSON Files', extensions: ['json'] }],
+    });
+
+    if (!result.canceled && result.filePaths.length > 0) {
+        try {
+            const data = await fs.readFile(result.filePaths[0], 'utf-8');
+            const presets = JSON.parse(data);
+            event.reply('imported-presets', presets);
+        } catch (err) {
+            console.error('Failed to read presets file:', err);
+            event.reply('import-presets-error', (err as Error).message);
+        }
+    } else {
+        console.log('Import canceled');
+    }
+});
+
 ipcMain.on('about-request', async (event) => {
     const pkgPath = path.join(app.getAppPath(), 'package.json');
     try {

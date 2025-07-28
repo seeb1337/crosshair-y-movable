@@ -129,6 +129,8 @@ settings.addEventListener('click', () => {
         const savePresetButton = frameBody.querySelector('#save-preset');
         const deletePresetBtn = frameBody.querySelector('#delete-preset');
         const deleteAllPresetsBtn = frameBody.querySelector('#delete-all-preset');
+        const exportPresets = frameBody.querySelector('#export-presets');
+        const importPresets = frameBody.querySelector('#import-presets');
         const setDirectory = frameBody.querySelector('#set-directory');
         const setDirectorySubText = setDirectory.querySelector('.sub-label');
         const removeDir = frameBody.querySelector('#remove-directory');
@@ -435,6 +437,97 @@ settings.addEventListener('click', () => {
                 }
             ]);
         });
+
+        exportPresets.addEventListener('action', e => {
+            const presets = JSON.parse(localStorage.getItem('crosshair-presets'));
+
+            if (e.detail.value === 'save') {
+                if (presets && Object.keys(presets).length > 0) {
+                    ipcRenderer.send('export-presets', presets || {});
+                } else {
+                    messageFromUI('No presets to export.');
+                }
+            } else if (e.detail.value === 'clipboard') {
+                if (presets && Object.keys(presets).length > 0) {
+                    navigator.clipboard.writeText(JSON.stringify(presets, null, 2))
+                        .then(() => {
+                            messageFromUI('Copied to clipboard.');
+                        })
+                        .catch(err => {
+                            console.error('Failed to copy presets:', err);
+                            messageFromUI('Failed to copy presets to clipboard.');
+                        });
+                } else {
+                    messageFromUI('No presets to copy.');
+                }
+            }
+        });
+
+        importPresets.addEventListener('action', e => {
+            if (e.detail.value === 'load') {
+                ipcRenderer.send('import-presets');
+                ipcRenderer.once('imported-presets', (event, presets) => {
+                    if (presets && Object.keys(presets).length > 0) {
+                        localStorage.setItem('crosshair-presets', JSON.stringify(presets));
+                        rebuildPresetList();
+                        messageFromUI('Presets imported successfully.');
+                    } else {
+                        messageFromUI('No presets found in the file.');
+                    }
+                });
+                ipcMain.once('import-presets-error', (event, error) => {
+                    console.error('Error importing presets:', error);
+                    messageFromUI('Failed to import presets. Please check the file format.');
+                });
+            } else if (e.detail.value === 'clipboard') {
+                navigator.clipboard.readText()
+                    .then(text => {
+                        try {
+                            const presets = JSON.parse(text);
+                            localStorage.setItem('crosshair-presets', JSON.stringify(presets));
+                            rebuildPresetList();
+                            messageFromUI('Presets imported from clipboard.');
+                        } catch (err) {
+                            console.error('Failed to parse presets from clipboard:', err);
+                            messageFromUI('Invalid presets format in clipboard.');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Failed to read clipboard:', err);
+                        messageFromUI('Failed to read presets from clipboard.');
+                    });
+            }
+        });
+
+        const messageFromUI = (message, opts = {}) => {
+            const cfg = {
+                okText: 'OK',
+                onClose: modal => modal.remove(),
+                ...opts
+            };
+
+            const modal = new Modal([
+                {
+                    element: 'div',
+                    extraClass: 'modal-wrapper',
+                    children: [
+                        { element: 'div', text: message, extraClass: 'modal-message' },
+                        {
+                            element: 'div',
+                            extraClass: 'modal-wrapper-buttons',
+                            children: [
+                                {
+                                    element: 'button',
+                                    text: cfg.okText,
+                                    event: 'click',
+                                    eventAction: () => cfg.onClose(modal)
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]);
+        };
 
         const crosshairsDirectory = localStorage.getItem('crosshairs-directory') || '';
 
