@@ -302,6 +302,8 @@ body {
                 justify-content: center;
                 align-items: center;
                 transition: 200ms;
+                scale: .9;
+                position: relative;
                 transition-property: background, opacity;
 
                 &:hover {
@@ -310,6 +312,14 @@ body {
 
                 &:active {
                     opacity: 0.7;
+                }
+
+                &:first-child {
+                    top: calc(var(--default-px) / 3);
+                }
+
+                &:last-child {
+                    bottom: calc(var(--default-px) / 3);
                 }
 
                 svg {
@@ -324,6 +334,10 @@ body {
                 border: none;
                 overflow: hidden;
             }
+        }
+
+        &.search-active {
+            border-color: var(--accent-primary);
         }
     }
 }

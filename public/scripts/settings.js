@@ -31,6 +31,7 @@ settings.addEventListener('click', () => {
 
         const navigationWrapper = frameBody.querySelector('.navigation-wrapper');
         const navigationTabs = frameBody.querySelector('.navigation-tabs');
+        const navigationInput = frameBody.querySelector('.navigation-input');
         const searchInput = frameBody.querySelector('#search-input');
         const itemsFound = frameBody.querySelector('.items-found');
         const navButtons = frameBody.querySelector('.navigation-buttons');
@@ -113,6 +114,14 @@ settings.addEventListener('click', () => {
                 });
             });
             navigationTabs.appendChild(tab);
+        });
+
+        searchInput.addEventListener('focus', () => {
+            navigationInput.classList.add('search-active');
+        });
+
+        searchInput.addEventListener('blur', () => {
+            navigationInput.classList.remove('search-active');
         });
 
         if (localStorage.getItem('light-theme')) {

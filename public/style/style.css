@@ -269,6 +269,8 @@ body.body-settings .section {
   justify-content: center;
   align-items: center;
   transition: 200ms;
+  scale: 0.9;
+  position: relative;
   transition-property: background, opacity;
 }
 .navigation-wrapper .navigation-input .navigation-buttons .nav-button:hover {
@@ -276,6 +278,12 @@ body.body-settings .section {
 }
 .navigation-wrapper .navigation-input .navigation-buttons .nav-button:active {
   opacity: 0.7;
+}
+.navigation-wrapper .navigation-input .navigation-buttons .nav-button:first-child {
+  top: calc(var(--default-px) / 3);
+}
+.navigation-wrapper .navigation-input .navigation-buttons .nav-button:last-child {
+  bottom: calc(var(--default-px) / 3);
 }
 .navigation-wrapper .navigation-input .navigation-buttons .nav-button svg {
   scale: 0.8;
@@ -286,6 +294,9 @@ body.body-settings .section {
   padding: 0;
   border: none;
   overflow: hidden;
+}
+.navigation-wrapper .navigation-input.search-active {
+  border-color: var(--accent-primary);
 }
 
 .group-title {
