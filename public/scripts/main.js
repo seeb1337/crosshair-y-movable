@@ -23,6 +23,7 @@ const container = document.querySelector('.container');
 const builtInSection = document.getElementById('built-in');
 const customSection = document.getElementById('custom');
 const toggleCrosshair = document.getElementById('toggle-crosshair');
+const sortSelect = document.getElementById('sort-select');
 const refreshDir = document.querySelector('.refresh-dir');
 const openDir = document.querySelector('.open-dir');
 
@@ -89,43 +90,78 @@ if (localStorage.getItem('auto-updates')) {
     updatesCheck(true);
 }
 
+let fileFormats = [];
+let originalNames = [];
+
 ipcRenderer.send('onload-crosshair-directory', localStorage.getItem('crosshairs-directory') || null);
-ipcRenderer.on('custom-crosshairs-response', (event, crosshairs) => {
-    let fileFormats = [];
+ipcRenderer.on('custom-crosshairs-response', (_event, crosshairs) => {
+    originalNames = crosshairs;
 
-    customSection.innerHTML = crosshairs.map(crosshair => {
-        const nameSplit = crosshair.split('.');
-        const nameFormat = nameSplit.pop();
-        const name = nameSplit.join('.');
+    fileFormats = crosshairs.map(c => {
+        const parts = c.split('.');
+        return {
+            name: parts.slice(0, -1).join('.'),
+            format: parts.pop()
+        };
+    });
 
-        fileFormats.push({ name: name, format: nameFormat });
+    renderCustomSection(originalNames);
+    attachClickHandlers();
+});
 
-        return `
-        <div class="crosshair">
-            <img src="${localStorage.getItem('crosshairs-directory')}/${crosshair}" height="40" width="40" draggable="false" alt="">
-            <div>${name}</div>
-        </div>
-        `;
-    }).join('');
+function renderCustomSection(list) {
+    const dir = localStorage.getItem('crosshairs-directory');
+    customSection.innerHTML = list
+        .map(fileName => {
+            const nameOnly = fileName.split('.').slice(0, -1).join('.');
+            return `
+                <div class="crosshair">
+                  <img src="${dir}/${fileName}" height="40" width="40" draggable="false" alt="">
+                  <div>${nameOnly}</div>
+                </div>`;
+            })
+            .join('');
+}
 
-    customSection.querySelectorAll('.crosshair').forEach(crosshair => {
-        crosshair.addEventListener('click', () => {
-            const name = crosshair.querySelector('div').textContent;
-            let path = '';
+function attachClickHandlers() {
+    customSection.querySelectorAll('.crosshair').forEach(div => {
+        div.addEventListener('click', () => {
+            const clickedName = div.querySelector('div').textContent.trim();
+            const match = fileFormats.find(f => f.name === clickedName);
+            if (!match) return;
 
-            for (let i = 0; i < fileFormats.length; i++) {
-                if (name.toLowerCase().trim() === fileFormats[i].name.toLowerCase().trim()) {
-                    path = `${name}.${fileFormats[i].format}`;
-                }
+            const fullPath = `${match.name}.${match.format}`;
+            ipcRenderer.send('change-custom-crosshair', fullPath);
+
+            if (typeof refreshOverlay === 'function') refreshOverlay();
+
+            if (typeof config === 'object') {
+                config.crosshair = fullPath;
+                localStorage.setItem('custom-crosshair', fullPath);
             }
-
-            ipcRenderer.send('change-custom-crosshair', path);
-            refreshOverlay();
-
-            config.crosshair = path;
-            localStorage.setItem('custom-crosshair', path);
         });
     });
+}
+
+sortSelect.addEventListener('change', () => {
+    const order = sortSelect.value;
+    const sorted = [...originalNames].sort((a, b) => {
+        const nameA = a.split('.').slice(0, -1).join('.').toLowerCase();
+        const nameB = b.split('.').slice(0, -1).join('.').toLowerCase();
+        return order === 'az'
+            ? nameA.localeCompare(nameB)
+            : nameB.localeCompare(nameA);
+    });
+
+    renderCustomSection(sorted);
+    attachClickHandlers();
+});
+
+document.querySelector('.refresh-dir').addEventListener('click', () => {
+    ipcRenderer.send(
+        'onload-crosshair-directory',
+        localStorage.getItem('crosshairs-directory') || null
+    );
 });
 
 ipcRenderer.on('custom-crosshairs-response-fail', () => {

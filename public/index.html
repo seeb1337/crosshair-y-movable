@@ -30,7 +30,11 @@
         <div class="header">
             <h2>Custom</h2>
             <div class="header-options">
-                <div class="header-option refresh-dir">Refresh</div>
+                <custom-select id="sort-select" style="margin-right: var(--default-px);">
+                    <option value="az">A-Z</option>
+                    <option value="za">Z-A</option>
+                </custom-select>
+                <div class="header-option refresh-dir" style="border-radius: var(--default-px) 0 0 var(--default-px);">Refresh</div>
                 <div class="header-option open-dir disabled">Open Directory</div>
             </div>
         </div>
