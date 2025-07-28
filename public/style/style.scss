@@ -109,6 +109,10 @@ body {
     transition: 200ms;
     transition-property: border-color, gap;
 
+    &:hover {
+        border-color: var(--accent-primary);
+    }
+
     &:has(input:focus) {
         gap: calc(var(--default-px) / 2);
         border-color: var(--accent-primary);

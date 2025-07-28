@@ -104,6 +104,9 @@ body.body-settings .section {
   transition: 200ms;
   transition-property: border-color, gap;
 }
+.search-crosshairs:hover {
+  border-color: var(--accent-primary);
+}
 .search-crosshairs:has(input:focus) {
   gap: calc(var(--default-px) / 2);
   border-color: var(--accent-primary);
