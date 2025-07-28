@@ -708,9 +708,33 @@ class CustomSelect extends HTMLElement {
 
     _reposition() {
         if (!this._open) return;
-        const rect = this.getBoundingClientRect();
-        this._dropdown.style.top = `${rect.bottom + window.scrollY}px`;
-        this._dropdown.style.left = `${rect.left + window.scrollX}px`;
+
+        const triggerRect = this.getBoundingClientRect();
+        const dropdownHeight = this._dropdown.offsetHeight || 200;
+        const gap = 4;
+
+        const spaceBelow = window.innerHeight - triggerRect.bottom;
+        const spaceAbove = triggerRect.top;
+
+        const fitsBelow = spaceBelow >= dropdownHeight + gap;
+        const fitsAbove = spaceAbove >= dropdownHeight + gap;
+
+        let top, direction;
+        if (fitsBelow) {
+            top = triggerRect.bottom + window.scrollY + gap;
+            direction = 1;
+        } else if (fitsAbove) {
+            top = triggerRect.top + window.scrollY - dropdownHeight - gap;
+            direction = -1;
+        } else {
+            top = triggerRect.bottom + window.scrollY + gap;
+            direction = 1;
+        }
+
+        this._dropdown.style.top = `${top}px`;
+        this._dropdown.style.left = `${triggerRect.left + window.scrollX}px`;
+
+        this.style.setProperty('--dropdown-direction', direction);
     }
 
     _onOutsideClick(e) {
