@@ -37,27 +37,7 @@ class ContextMenu {
         `;
 
         this.#items.forEach((callback, label) => {
-            const entry = document.createElement('div');
-            entry.textContent = label;
-            entry.className = 'ctx-item';
-            entry.style.cssText = `
-                padding: calc(var(--default-px) / 1.5) calc(var(--default-px) * 2);
-                cursor: pointer;
-                transition: background 150ms ease;
-                white-space: nowrap;
-            `;
-            entry.addEventListener('mouseenter', () => {
-                entry.style.background = 'var(--hover-state)';
-            });
-            entry.addEventListener('mouseleave', () => {
-                entry.style.background = 'transparent';
-            });
-            entry.addEventListener('click', (ev) => {
-                ev.stopPropagation();
-                this.#close();
-                callback(this.#target);
-            });
-            this.#menu.appendChild(entry);
+            this.#buildItem(label, callback);
         });
 
         document.body.appendChild(this.#menu);
@@ -144,10 +124,50 @@ class ContextMenu {
         entry.addEventListener('mouseleave', () => {
             entry.style.background = 'transparent';
         });
+
         entry.addEventListener('click', (ev) => {
             ev.stopPropagation();
             this.#close();
-            callback(this.#target);
+
+            const menuItem = {
+                target: this.#target,
+
+                /**
+                 * Gets the current text label of the context menu item.
+                 * @returns {string} The item's label.
+                 */
+                getText: () => entry.textContent,
+
+                /**
+                 * Sets the text label of the context menu item.
+                 * @param {string} newLabel - The new label to display.
+                 */
+                setText: (newLabel) => {
+                    if (typeof newLabel !== 'string' || !newLabel.trim()) {
+                        console.error('ContextMenu item label must be a non-empty string.');
+                        return;
+                    }
+                    const currentLabel = label;
+                    if (newLabel !== currentLabel && this.#items.has(newLabel)) {
+                        console.error(`ContextMenu item with label "${newLabel}" already exists.`);
+                        return;
+                    }
+
+                    const newItemsMap = new Map();
+                    this.#items.forEach((value, key) => {
+                        if (key === currentLabel) {
+                            newItemsMap.set(newLabel, value);
+                        } else {
+                            newItemsMap.set(key, value);
+                        }
+                    });
+                    this.#items = newItemsMap;
+
+                    entry.textContent = newLabel;
+                    label = newLabel;
+                }
+            };
+            callback(menuItem);
         });
         this.#menu.appendChild(entry);
     }
