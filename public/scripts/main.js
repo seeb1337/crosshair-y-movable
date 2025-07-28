@@ -94,39 +94,35 @@ let fileFormats = [];
 let originalNames = [];
 let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 
-ipcRenderer.send('onload-crosshair-directory', localStorage.getItem('crosshairs-directory') || null);
-ipcRenderer.on('custom-crosshairs-response', (_event, crosshairs) => {
-    originalNames = crosshairs;
+function updateAndRender() {
+    const sortOrder = sortSelect.value;
 
-    fileFormats = crosshairs.map(c => {
-        const parts = c.split('.');
-        return {
-            name: parts.slice(0, -1).join('.'),
-            format: parts.pop()
-        };
+    const sortedList = [...originalNames].sort((a, b) => {
+        const nameA = a.split('.').slice(0, -1).join('.').toLowerCase();
+        const nameB = b.split('.').slice(0, -1).join('.').toLowerCase();
+        return sortOrder === 'az'
+            ? nameA.localeCompare(nameB)
+            : nameB.localeCompare(nameA);
     });
 
-    renderCustomSection(originalNames);
-    attachClickHandlers();
-});
+    const favoriteItems = sortedList.filter(f => favorites.includes(f));
+    const nonFavoriteItems = sortedList.filter(f => !favorites.includes(f));
 
-function renderCustomSection(list) {
+    const finalList = [...favoriteItems, ...nonFavoriteItems];
+
+    renderCustomSection(finalList);
+}
+
+
+function renderCustomSection(listToRender) {
     const dir = localStorage.getItem('crosshairs-directory');
     if (!dir) return;
 
-    const ordered = [
-        ...favorites.filter(f => list.includes(f)),
-        ...list.filter(f => !favorites.includes(f))
-    ].sort((a, b) =>
-        a.split('.').slice(0, -1).join('.')
-            .localeCompare(b.split('.').slice(0, -1).join('.'))
-    );
-
     customSection.innerHTML = '';
-    ordered.forEach(fileName => {
+    listToRender.forEach(fileName => {
         const nameOnly = fileName.split('.').slice(0, -1).join('.');
         const div = document.createElement('div');
-        div.className = 'crosshair';
+        div.className = 'crosshair' + (favorites.includes(fileName) ? ' favorite-crosshair' : '');
         div.dataset.file = fileName;
         div.innerHTML = `
             <img src="${dir}/${fileName}" height="40" width="40" draggable="false" alt="">
@@ -134,27 +130,17 @@ function renderCustomSection(list) {
         customSection.appendChild(div);
 
         const isFavorite = favorites.includes(fileName);
-
         const favoriteLabel = isFavorite ? 'Remove from favorites' : 'Add to favorites';
 
         new ContextMenu(div, {
-            [favoriteLabel]: item => {
-                const wasFavorite = favorites.includes(fileName);
-
-                if (wasFavorite) {
-                    const idx = favorites.indexOf(fileName);
-                    if (idx !== -1) {
-                        favorites.splice(idx, 1);
-                        localStorage.setItem('favorites', JSON.stringify(favorites));
-                        renderCustomSection(originalNames);
-                        item.setText('Add to favorites');
-                    }
+            [favoriteLabel]: () => {
+                if (favorites.includes(fileName)) {
+                    favorites = favorites.filter(f => f !== fileName);
                 } else {
                     favorites.push(fileName);
-                    localStorage.setItem('favorites', JSON.stringify(favorites));
-                    renderCustomSection(originalNames);
-                    item.setText('Remove from favorites');
                 }
+                localStorage.setItem('favorites', JSON.stringify(favorites));
+                updateAndRender();
             },
             'Reveal in folder': () => ipcRenderer.send('reveal-crosshair', fileName),
             'Delete': () => {
@@ -174,13 +160,12 @@ function renderCustomSection(list) {
                                         text: 'Delete',
                                         event: 'click',
                                         eventAction: (e) => {
-                                            const idx = favorites.indexOf(fileName);
-                                            if (idx !== -1) {
-                                                favorites.splice(idx, 1);
-                                                localStorage.setItem('favorites', JSON.stringify(favorites));
-                                            }
+                                            originalNames = originalNames.filter(name => name !== fileName);
+                                            favorites = favorites.filter(name => name !== fileName);
+                                            localStorage.setItem('favorites', JSON.stringify(favorites));
 
                                             ipcRenderer.send('delete-crosshair', fileName);
+                                            updateAndRender();
 
                                             e.target.closest('.modal-background').remove();
                                         }
@@ -219,19 +204,25 @@ function attachClickHandlers() {
     });
 }
 
-sortSelect.addEventListener('change', () => {
-    const order = sortSelect.value;
-    const sorted = [...originalNames].sort((a, b) => {
-        const nameA = a.split('.').slice(0, -1).join('.').toLowerCase();
-        const nameB = b.split('.').slice(0, -1).join('.').toLowerCase();
-        return order === 'az'
-            ? nameA.localeCompare(nameB)
-            : nameB.localeCompare(nameA);
+ipcRenderer.on('custom-crosshairs-response', (_event, crosshairs) => {
+    originalNames = crosshairs;
+
+    fileFormats = crosshairs.map(c => {
+        const parts = c.split('.');
+        return {
+            name: parts.slice(0, -1).join('.'),
+            format: parts.pop()
+        };
     });
 
-    renderCustomSection(sorted);
-    attachClickHandlers();
+    updateAndRender();
 });
+
+sortSelect.addEventListener('change', () => {
+    updateAndRender();
+});
+
+ipcRenderer.send('onload-crosshair-directory', localStorage.getItem('crosshairs-directory') || null);
 
 document.querySelector('.refresh-dir').addEventListener('click', () => {
     ipcRenderer.send(

@@ -122,6 +122,19 @@ body {
     div {
         text-align: center;
     }
+
+    &.favorite-crosshair {
+        position: relative;
+
+        &::before {
+            content: '★';
+            position: absolute;
+            top: calc(var(--default-px) / 3);
+            right: calc(var(--default-px) / 2);
+            color: var(--accent-primary);
+            font-size: calc(var(--default-px) * 2);
+        }
+    }
 }
 
 .header {

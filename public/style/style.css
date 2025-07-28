@@ -1,3 +1,4 @@
+@charset "UTF-8";
 :root {
   --default-px: 8px;
   --primary-color: #181818;
@@ -113,6 +114,17 @@ body.body-settings .section {
 }
 .crosshair div {
   text-align: center;
+}
+.crosshair.favorite-crosshair {
+  position: relative;
+}
+.crosshair.favorite-crosshair::before {
+  content: "★";
+  position: absolute;
+  top: calc(var(--default-px) / 3);
+  right: calc(var(--default-px) / 2);
+  color: var(--accent-primary);
+  font-size: calc(var(--default-px) * 2);
 }
 
 .header {
