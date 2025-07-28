@@ -8,13 +8,11 @@ class Modal {
             position: fixed;
             inset: 0;
             z-index: 999;
-            background: rgba(0, 0, 0, 0.45);
+            background: color-mix(in srgb, var(--primary-color) 50%, transparent);
             opacity: 0;
             -webkit-backdrop-filter: blur(0px);
             backdrop-filter: blur(0px);
             will-change: opacity, backdrop-filter;
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
         `;
 
         this.modal = document.createElement('div');
@@ -25,17 +23,15 @@ class Modal {
             left: 50%;
             min-width: 280px;
             max-width: 90vw;
-            background: #181818;
-            border-radius: 12px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+            background: var(--secondary-color);
+            color: var(--text);
+            border: 1px solid var(--line-color);
+            border-radius: calc(var(--default-px) * 1.5);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, .25);
             opacity: 0;
-            -webkit-transform: translate(-50%, -50%) scale(0.85);
-            transform: translate(-50%, -50%) scale(0.85);
+            -webkit-transform: translate(-50%, -50%) scale(.85);
+            transform: translate(-50%, -50%) scale(.85);
             will-change: transform, opacity;
-            -webkit-transform-origin: center;
-            transform-origin: center;
-            -webkit-transform-style: preserve-3d;
-            transform-style: preserve-3d;
         `;
 
         this.modalBackground.appendChild(this.modal);

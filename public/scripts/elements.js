@@ -493,7 +493,6 @@ class CustomSelect extends HTMLElement {
                 --bg: var(--primary-color, #181818);
                 --border: 1px solid #ccc;
                 --accent: var(--accent-primary, #0057b7);
-                --text: #fff;
                 --shadow: 0 4px 12px rgba(0,0,0,.15);
                 display: inline-block;
                 position: relative;
@@ -821,7 +820,6 @@ class MultiButtons extends HTMLElement {
                 --bg: var(--primary-color, #181818);
                 --border: 1px solid #ccc;
                 --accent: var(--accent-primary, #0057b7);
-                --text: #fff;
                 --shadow: 0 4px 12px rgba(0,0,0,.15);
                 display: inline-block;
                 position: relative;
