@@ -808,3 +808,253 @@ class CustomSelect extends HTMLElement {
 }
 
 customElements.define('custom-select', CustomSelect);
+
+class MultiButtons extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+
+        const style = document.createElement('style');
+        style.textContent = `
+            :host {
+                --radius: 8px;
+                --bg: var(--primary-color, #181818);
+                --border: 1px solid #ccc;
+                --accent: var(--accent-primary, #0057b7);
+                --text: #fff;
+                --shadow: 0 4px 12px rgba(0,0,0,.15);
+                display: inline-block;
+                position: relative;
+                font-family: inherit;
+                font-size: 14px;
+            }
+
+            .trigger {
+                padding: 10px 16px;
+                border: var(--border);
+                border-radius: var(--radius);
+                background: var(--bg);
+                color: var(--text);
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                user-select: none;
+            }
+            .trigger:focus-visible {
+                outline: 2px solid var(--accent);
+                outline-offset: 2px;
+            }
+
+            .chevron {
+                width: 12px;
+                height: 12px;
+                fill: none;
+                stroke: currentColor;
+                stroke-width: 2;
+                transition: transform .25s;
+            }
+            :host([open]) .chevron {
+                transform: rotate(180deg);
+            }
+
+            .dropdown {
+                position: fixed;
+                top: 0;
+                left: 0;
+                min-width: var(--dropdown-width, 160px);
+                background: var(--bg);
+                border: var(--border);
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                z-index: 9999;
+                opacity: 0;
+                transform: translateY(-6px);
+                overflow: hidden;
+                pointer-events: none;
+                transition: opacity .25s ease, transform .25s ease;
+            }
+            :host([open]) .dropdown {
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: auto;
+            }
+
+            .option {
+                all: unset;
+                display: block;
+                padding: 8px 12px;
+                cursor: pointer;
+                white-space: nowrap;
+                box-sizing: border-box;
+                width: 100%;
+                color: var(--text);
+            }
+            .option:hover {
+                background: var(--accent);
+            }
+        `;
+
+        this._trigger = document.createElement('button');
+        this._trigger.className = 'trigger';
+        this._trigger.type = 'button';
+        this._trigger.setAttribute('aria-haspopup', 'menu');
+        this._trigger.setAttribute('aria-expanded', 'false');
+
+        this._label = document.createElement('span');
+        this._label.textContent = this.getAttribute('value') || '';
+
+        this._chevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        this._chevron.classList.add('chevron');
+        this._chevron.setAttribute('viewBox', '0 0 24 24');
+        this._chevron.innerHTML = '<polyline points="6,9 12,15 18,9"/>';
+
+        this._trigger.append(this._label, this._chevron);
+
+        this._dropdown = document.createElement('div');
+        this._dropdown.className = 'dropdown';
+        this._dropdown.setAttribute('role', 'menu');
+
+        this.shadowRoot.append(style, this._trigger, this._dropdown);
+
+        this._open = false;
+        this._boundReposition = () => this._reposition();
+        this._boundOutsideClick = (e) => this._onOutsideClick(e);
+
+        this._trigger.addEventListener('click', () => this.toggle());
+        this.addEventListener('keydown', this._onKeyDown.bind(this));
+    }
+
+    get open() { return this._open; }
+    set open(flag) { flag ? this._show() : this._hide(); }
+    toggle() { this.open = !this.open; }
+
+    _parseOptions() {
+        this._dropdown.innerHTML = '';
+        [...this.children]
+            .filter(n => n.tagName === 'OPTION')
+            .forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option';
+                btn.type = 'button';
+                btn.dataset.value = opt.value;
+                btn.textContent = opt.textContent;
+                btn.setAttribute('role', 'menuitem');
+                btn.addEventListener('click', () => this._invoke(opt.value, opt.textContent));
+                this._dropdown.appendChild(btn);
+            });
+    }
+
+    _invoke(value, label) {
+        this.dispatchEvent(
+            new CustomEvent('action', {
+                detail: { value, label },
+                bubbles: true,
+            })
+        );
+        this.open = false;
+    }
+
+    _show() {
+        if (this._open) return;
+        this._open = true;
+        this.setAttribute('open', '');
+        this._trigger.setAttribute('aria-expanded', 'true');
+        this.style.setProperty('--dropdown-width', `${this.offsetWidth}px`);
+        this._reposition();
+        window.addEventListener('scroll', this._boundReposition, true);
+        window.addEventListener('resize', this._boundReposition);
+        document.addEventListener('click', this._boundOutsideClick, true);
+    }
+
+    _hide() {
+        if (!this._open) return;
+        this._open = false;
+        this.removeAttribute('open');
+        this._trigger.setAttribute('aria-expanded', 'false');
+        window.removeEventListener('scroll', this._boundReposition, true);
+        window.removeEventListener('resize', this._boundReposition);
+        document.removeEventListener('click', this._boundOutsideClick, true);
+    }
+
+    _reposition() {
+        if (!this._open) return;
+
+        const triggerRect = this.getBoundingClientRect();
+        const dropdownWidth = this._dropdown.offsetWidth || 160;
+        const dropdownHeight = this._dropdown.offsetHeight || 200;
+        const gap = 4;
+
+        let left;
+        if (triggerRect.left + dropdownWidth + gap > window.innerWidth) {
+            left = triggerRect.right + window.scrollX - dropdownWidth;
+        } else {
+            left = triggerRect.left + window.scrollX;
+        }
+
+        let top;
+        const spaceBelow = window.innerHeight - triggerRect.bottom;
+        const spaceAbove = triggerRect.top;
+
+        if (spaceBelow >= dropdownHeight + gap) {
+            top = triggerRect.bottom + window.scrollY + gap;
+        } else if (spaceAbove >= dropdownHeight + gap) {
+            top = triggerRect.top + window.scrollY - dropdownHeight - gap;
+        } else {
+            top = triggerRect.bottom + window.scrollY + gap;
+        }
+
+        this._dropdown.style.left = `${left}px`;
+        this._dropdown.style.top = `${top}px`;
+    }
+
+    _onOutsideClick(e) {
+        if (!e.composedPath().includes(this)) this._hide();
+    }
+
+    _onKeyDown(e) {
+        if (!this._open && ['ArrowDown', ' '].includes(e.key)) {
+            e.preventDefault();
+            this.open = true;
+            return;
+        }
+        if (!this._open) return;
+
+        const items = [...this._dropdown.querySelectorAll('.option')];
+        const idx = items.findIndex(b => b.matches(':focus'));
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                items[(idx + 1) % items.length]?.focus();
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                items[(idx - 1 + items.length) % items.length]?.focus();
+                break;
+            case 'Escape':
+                e.preventDefault();
+                this.open = false;
+                this._trigger.focus();
+                break;
+        }
+    }
+
+    connectedCallback() {
+        this._parseOptions();
+        this._upgradeProperty('open');
+    }
+
+    _upgradeProperty(prop) {
+        if (this.hasOwnProperty(prop)) {
+            const v = this[prop];
+            delete this[prop];
+            this[prop] = v;
+        }
+    }
+
+    disconnectedCallback() {
+        this._hide();
+    }
+}
+
+customElements.define('multi-buttons', MultiButtons);
