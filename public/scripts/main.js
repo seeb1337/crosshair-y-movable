@@ -117,7 +117,10 @@ function renderCustomSection(list) {
     const ordered = [
         ...favorites.filter(f => list.includes(f)),
         ...list.filter(f => !favorites.includes(f))
-    ];
+    ].sort((a, b) =>
+        a.split('.').slice(0, -1).join('.')
+            .localeCompare(b.split('.').slice(0, -1).join('.'))
+    );
 
     customSection.innerHTML = '';
     ordered.forEach(fileName => {
