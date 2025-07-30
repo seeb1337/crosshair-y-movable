@@ -14,6 +14,7 @@ import openurl from 'openurl';
 import axios from 'axios';
 import childProcess from 'child_process';
 import CrosshairOverlay = require('./crosshair');
+import createEditorWindow from './editor';
 import { arch, platform } from 'os';
 
 let window: BrowserWindow;
@@ -38,10 +39,6 @@ app.on('ready', () => {
 
     window.setMenu(null);
     window.loadFile(path.join(app.getAppPath(), 'public', 'index.html'));
-
-    globalShortcut.register('Ctrl+Shift+I', () =>
-        window.webContents?.openDevTools()
-    );
 
     const iconPath = path.join(__dirname, '..', '/icon.png');
     const trayIcon = nativeImage.createFromPath(iconPath).resize({ width: 16 });
@@ -360,6 +357,14 @@ ipcMain.on('delete-crosshair', async (_e, fileName: string) => {
     } catch (err) {
         console.error(err);
     }
+});
+
+ipcMain.on('open-svg-editor', (event, filePath) => {
+    const editorWindow = createEditorWindow(filePath);
+
+    editorWindow.on('closed', () => {
+        editorWindow.destroy();
+    });
 });
 
 ipcMain.on('about-request', async (event) => {

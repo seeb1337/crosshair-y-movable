@@ -126,7 +126,6 @@ function updateAndRender() {
     renderCustomSection(finalList);
 }
 
-
 function renderCustomSection(listToRender) {
     const dir = localStorage.getItem('crosshairs-directory');
     if (!dir) return;
@@ -145,7 +144,7 @@ function renderCustomSection(listToRender) {
         const isFavorite = favorites.includes(fileName);
         const favoriteLabel = isFavorite ? 'Remove from favorites' : 'Add to favorites';
 
-        new ContextMenu(div, {
+        const menuItems = {
             [favoriteLabel]: () => {
                 if (favorites.includes(fileName)) {
                     favorites = favorites.filter(f => f !== fileName);
@@ -191,7 +190,17 @@ function renderCustomSection(listToRender) {
                 ]);
                 document.body.lastElementChild.__modal = document.body.lastElementChild;
             }
-        });
+        }
+
+        if (fileName.toLowerCase().endsWith('.svg')) {
+            menuItems['Editor'] = () => {
+                console.log('Opening SVG editor for:', fileName);
+                ipcRenderer.send('open-svg-editor', `${dir}/${fileName}`);
+                console.log('SVG editor opened for:', fileName);
+            }
+        }
+
+        new ContextMenu(div, menuItems);
     });
 
     attachClickHandlers();
