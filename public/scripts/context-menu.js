@@ -11,8 +11,8 @@ class ContextMenu {
     #boundOnKeyDown;
 
     constructor(targetElement, itemsObject = {}) {
-        if (!(targetElement instanceof HTMLElement))
-            throw new TypeError('ContextMenu expects a valid HTMLElement as first argument');
+        if (!(targetElement instanceof Element))
+            throw new TypeError('ContextMenu expects a valid Element as first argument');
 
         this.#target = targetElement;
         this.#items = new Map(Object.entries(itemsObject));
