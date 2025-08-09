@@ -15,7 +15,7 @@
   "description": "A free and open-source alternative to Crosshair X",
   "dependencies": {
     "axios": "^1.7.9",
-    "electron": "^34.2.0",
+    "electron": "^37.2.5",
     "openurl": "^1.1.1"
   },
   "devDependencies": {
