@@ -172,6 +172,17 @@
             font-family: monospace;
             font-size: 14px;
         }
+
+        .zoom-control {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+            padding: 8px;
+        }
+        #zoom-slider {
+            transform: translateX(-40px);
+        }
     </style>
 </head>
 <body>
@@ -229,15 +240,24 @@
                         <label for="prop-stroke-width">Stroke Width</label>
                         <input type="number" id="prop-stroke-width" value="1" min="0">
                     </div>
+                    <div class="zoom-control">
+                        <div style="font-size: 12px; color: var(--text);">Zoom <span id="zoom-label">100%</span></div>
+                        <custom-range id="zoom-slider" type="range" min="25" max="400" value="100" style="width: 120px;"></custom-range>
+                        <div style="display: flex; gap: 6px;">
+                            <button id="zoom-reset" class="tool-button" title="Reset Zoom">1x</button>
+                            <button id="zoom-fit" class="tool-button" title="Fit to view">Fit</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-             <div class="palette-container">
+            <div class="palette-container">
                 <h3 class="sidebar-heading">Instant Palette</h3>
                 <div id="palette-panel" class="palette-panel"></div>
             </div>
         </aside>
     </div>
     <script src="./scripts/context-menu.js"></script>
+    <script src="./scripts/elements.js"></script>
     <script src="./scripts/editor.js"></script>
 </body>
 </html>
