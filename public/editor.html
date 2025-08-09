@@ -178,19 +178,33 @@
     <div class="editor-container">
         <div class="editor-toolbar">
             <button class="tool-button active" data-tool="select" title="Select (V)">
-                <svg viewBox="0 0 24 24"><path d="M9.17 14.5l3.92 3.92L11 20.5l-5.6-5.6c-.38-.38-.38-1.02 0-1.4l5.6-5.6.09.09L7.17 12.5H21v2z"></path></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 3 L17 12 L12 12 L15 20 L12.8 21 L9.7 13.3 L7 16 Z" fill="currentColor" />
+                </svg>
             </button>
             <button class="tool-button" data-tool="rect" title="Rectangle (R)">
-                <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"></path></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="4" y="4" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" rx="2" ry="2"
+                        stroke-linejoin="round" />
+                </svg>
             </button>
             <button class="tool-button" data-tool="ellipse" title="Ellipse (E)">
-                <svg viewBox="0 0 24 24"><path d="M12 4c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8z"></path></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2" />
+                </svg>
             </button>
-             <button class="tool-button" data-tool="line" title="Line (L)">
-                <svg viewBox="0 0 24 24"><path d="M3.23 20.77l17.54-17.54 1.41 1.41-17.54 17.54z"></path></svg>
+            <button class="tool-button" data-tool="line" title="Line (L)">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <line x1="5" y1="18" x2="19" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <circle cx="5" cy="18" r="1.5" fill="currentColor" />
+                    <circle cx="19" cy="6" r="1.5" fill="currentColor" />
+                </svg>
             </button>
             <button class="tool-button" data-tool="path" title="Curve (P)">
-                <svg viewBox="0 0 24 24"><path d="M4 19c3.31 0 8-5.31 8-10S10.31 3 7 3"></path></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 16 C8 8, 16 8, 20 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
             </button>
         </div>
         <main class="canvas-container" id="canvas-container">
