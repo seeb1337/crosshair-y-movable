@@ -24,6 +24,7 @@ Crosshair Y is a free and open-source alternative to Crosshair X, designed to pr
 - **Cross-Platform**: Available for Windows and Linux.
 - **Lightweight & Efficient**: Minimal system resource usage ensures smooth performance.
 - **User-Friendly Interface**: Intuitive UI for easy configuration and management.
+- **Built-in SVG Editor**: Effortlessly make changes to your SVGs in a single, fluid workspace.
 
 ## Installation
 
@@ -80,7 +81,7 @@ The built applications will be located in the `build/` directory.
 1. **Launching the App**: After running `npm start`, the main window will appear.
 2. **Selecting a Crosshair**:
    - **Built-in**: Navigate to the "Built-in" section to choose from pre-installed crosshairs.
-   - **Custom**: Add your own crosshair images by selecting a directory containing `.png` files.
+   - **Custom**: Add your own crosshair images by selecting a directory containing `.png` or `.svg` files.
 3. **Customizing**:
    - **Size**: Adjust the size slider to change the crosshair size.
    - **Hue**: Modify the hue slider to change the crosshair color.
