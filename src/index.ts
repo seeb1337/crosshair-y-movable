@@ -16,6 +16,7 @@ import childProcess from 'child_process';
 import CrosshairOverlay = require('./crosshair');
 import createEditorWindow from './editor';
 import { arch, platform } from 'os';
+import { screen } from 'electron';
 
 let window: BrowserWindow;
 let tray: Tray;
@@ -83,7 +84,24 @@ app.on('ready', () => {
         window.hide();
     });
 
+    // Register the global shortcut for saving mouse position
+    try {
+        globalShortcut.register('CommandOrControl+Shift+S', () => {
+            const { x, y } = screen.getCursorScreenPoint();
+            if (window && !window.isDestroyed()) {
+                window.webContents.send('mouse-position', { x, y });
+            }
+        });
+        console.log('Global shortcut registered successfully: CommandOrControl+Shift+S');
+    } catch (error) {
+        console.error('Failed to register global shortcut: CommandOrControl+Shift+S', error);
+    }
+
     showMainWindow();
+});
+
+app.on('will-quit', () => {
+    globalShortcut.unregisterAll();
 });
 
 function showMainWindow() {
@@ -120,6 +138,9 @@ type Config = {
     rotation: number;
     opacity: number;
     crosshair: string;
+    fixedPosition?: boolean;
+    xPosition?: number;
+    yPosition?: number;
 };
 
 let customCrosshairsDir: string | null;
@@ -138,7 +159,10 @@ const DEFAULT_CONFIG: Config = {
     hue: 0,
     rotation: 0,
     opacity: 1,
-    crosshair: 'Simple.png'
+    crosshair: 'Simple.png',
+    fixedPosition: false,
+    xPosition: 0,
+    yPosition: 0,
 };
 
 let config: Config = { ...DEFAULT_CONFIG };
@@ -188,6 +212,9 @@ ipcMain.on('config', (event, newConfig: Config) => {
     crosshair.hue = +config.hue;
     crosshair.rotation = +config.rotation;
     crosshair.opacity = +config.opacity;
+    crosshair.fixedPosition = config.fixedPosition || false;
+    crosshair.xPosition = config.xPosition || 0;
+    crosshair.yPosition = config.yPosition || 0;
 
     crosshair.applySize();
     crosshair.applyHue();
@@ -213,6 +240,25 @@ ipcMain.on('change-rotation', (event, rotation) => {
 ipcMain.on('change-opacity', (event, opacity) => {
     crosshair.opacity = +opacity;
     crosshair.applyOpacity();
+});
+
+ipcMain.on('change-fixed-position', (event, fixedPosition) => {
+    crosshair.fixedPosition = fixedPosition;
+    crosshair.setBounds();
+});
+
+ipcMain.on('change-x-position', (event, xPosition) => {
+    crosshair.xPosition = +xPosition;
+    if (crosshair.fixedPosition) {
+        crosshair.setBounds();
+    }
+});
+
+ipcMain.on('change-y-position', (event, yPosition) => {
+    crosshair.yPosition = +yPosition;
+    if (crosshair.fixedPosition) {
+        crosshair.setBounds();
+    }
 });
 
 ipcMain.on('change-crosshair', (event, name) => {
