@@ -18,6 +18,7 @@ import createEditorWindow from './editor';
 import { arch, platform } from 'os';
 import { screen } from 'electron';
 
+let lastPosition: { x: number | undefined, y: number | undefined } = { x: undefined, y: undefined };
 let window: BrowserWindow;
 let tray: Tray;
 const crosshair = new CrosshairOverlay();
@@ -79,6 +80,11 @@ app.on('ready', () => {
 
     tray.on('click', () => showMainWindow());
 
+    window.on('hide', () => {
+        const [x, y] = window.getPosition();
+        lastPosition = { x, y };
+    });
+
     window.on('close', (e) => {
         e.preventDefault();
         window.hide();
@@ -105,19 +111,13 @@ app.on('will-quit', () => {
 });
 
 function showMainWindow() {
+    if (lastPosition.x !== undefined && lastPosition.y !== undefined) {
+        window.setPosition(lastPosition.x, lastPosition.y, false);
+    }
+
     if (window.isMinimized()) window.restore();
     window.show();
     window.focus();
-}
-
-function toggleCrosshair() {
-    if (crosshair.window?.isVisible()) {
-        crosshair.hide();
-    } else {
-        const selected = getSelectedCrosshairPath();
-        crosshair.open(selected || '');
-        crosshair.show();
-    }
 }
 
 let builtInCrosshairs: string[];
